@@ -2,8 +2,6 @@ package com.tripvault.TripVault.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
