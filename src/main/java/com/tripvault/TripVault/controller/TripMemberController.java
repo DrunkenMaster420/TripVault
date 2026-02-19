@@ -1,7 +1,7 @@
 package com.tripvault.TripVault.controller;
 
-import com.tripvault.TripVault.model.TripMember;
-import com.tripvault.TripVault.model.TripMemberRequest;
+import com.tripvault.TripVault.dto.TripMemberResponse;
+import com.tripvault.TripVault.dto.TripMemberRequest;
 import com.tripvault.TripVault.service.TripMemberService;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,13 +17,13 @@ public class TripMemberController {
     }
 
     @PostMapping("/{tripId}/members")
-    public TripMember addMember(@PathVariable Long tripId, @RequestBody TripMemberRequest request){
+    public TripMemberResponse addMember(@PathVariable Long tripId, @RequestBody TripMemberRequest request){
         Long loggedUserId=1L;
         return tripMemberService.addMember(tripId, request.getUserId(),request.getAllocatedBytes(),loggedUserId);
     }
 
     @GetMapping("/{tripId}/members")
-    public List<TripMember> getAllMembers(@PathVariable Long tripId){
+    public List<TripMemberResponse> getAllMembers(@PathVariable Long tripId){
         return tripMemberService.getMembers(tripId);
     }
 

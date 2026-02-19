@@ -1,4 +1,4 @@
-package com.tripvault.TripVault.model;
+package com.tripvault.TripVault.dto;
 
 import lombok.Data;
 

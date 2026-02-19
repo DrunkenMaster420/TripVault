@@ -1,5 +1,6 @@
 package com.tripvault.TripVault.service;
 
+import com.tripvault.TripVault.dto.TripMemberResponse;
 import com.tripvault.TripVault.model.Trip;
 import com.tripvault.TripVault.model.TripMember;
 import com.tripvault.TripVault.model.TripRole;
@@ -24,7 +25,7 @@ public class TripMemberService {
         this.userRepository=userRepository;
     }
 
-    public TripMember addMember(Long tripId,Long userId,Long allocatedBytes,Long loggedUserId){
+    public TripMemberResponse addMember(Long tripId, Long userId, Long allocatedBytes, Long loggedUserId){
         TripMember owner=tripMemberRepository.findByTrip_IdAndUser_Id(tripId,loggedUserId)
                 .orElseThrow(()->new RuntimeException("Not a trip member"));
         if(owner.getRole()!=TripRole.OWNER)throw new RuntimeException("Only owner can add members");
@@ -41,11 +42,14 @@ public class TripMemberService {
         member.setAllocatedBytes(allocatedBytes);
         member.setUsedBytes(0L);
 
-        return tripMemberRepository.save(member);
+        TripMember saved=tripMemberRepository.save(member);
+        return mapToResponse(saved);
     }
 
-    public List<TripMember> getMembers(Long tripId){
-        return tripMemberRepository.findByTrip_Id(tripId);
+    public List<TripMemberResponse> getMembers(Long tripId){
+        return tripMemberRepository.findByTrip_Id(tripId) .stream()
+                .map(this::mapToResponse)
+                .toList();
     }
 
     public void removeMember(Long tripId,Long userId,Long loggedUserId){
@@ -60,6 +64,23 @@ public class TripMemberService {
 
         tripMemberRepository.delete(member);
     }
+
+    private TripMemberResponse mapToResponse(TripMember member) {
+        TripMemberResponse response = new TripMemberResponse();
+
+        response.setUserId(member.getUser().getId());
+        response.setUsername(member.getUser().getUsername());
+        response.setName(member.getUser().getName());
+
+        response.setRole(member.getRole().name());
+        response.setAllocatedBytes(member.getAllocatedBytes());
+        response.setUsedBytes(member.getUsedBytes());
+        response.setJoinedAt(member.getJoinedAt());
+        response.setIsActive(member.getIsActive());
+
+        return response;
+    }
+
 
 
 }
