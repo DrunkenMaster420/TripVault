@@ -13,22 +13,16 @@ public class TripMember {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "trip_id",nullable = false)
     private Trip trip;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id",nullable = false)
     private User user;
 
     @Enumerated(EnumType.STRING)
     private TripRole role;
-
-    @Column(name = "allocated_bytes",nullable = false)
-    private Long allocatedBytes;
-
-    @Column(name = "used_bytes",nullable = false)
-    private Long usedBytes=0L;
 
     @Column(name = "joined_at",updatable = false)
     private LocalDateTime joinedAt;

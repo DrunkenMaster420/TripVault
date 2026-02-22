@@ -18,7 +18,7 @@ public class Trip {
 
     private String description;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by",nullable = false)
     private User createdBy;
 
