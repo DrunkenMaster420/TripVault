@@ -34,8 +34,6 @@ public class TripService {
         owner.setTrip(savedTrip);
         owner.setUser(user);
         owner.setRole(TripRole.OWNER);
-        owner.setAllocatedBytes(0L);
-        owner.setUsedBytes(0L);
 
         tripMemberRepository.save(owner);
 
