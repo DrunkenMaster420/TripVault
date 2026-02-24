@@ -1,11 +1,12 @@
 package com.tripvault.TripVault.service;
 
+import tools.jackson.databind.ObjectMapper;
 import com.google.api.client.http.*;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import tools.jackson.databind.ObjectMapper;
-
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 @Service
@@ -26,23 +27,26 @@ public class GoogleOAuthService {
     private static final String TOKEN_URL =
             "https://oauth2.googleapis.com/token";
 
-    public String getAuthorizationUrl() {
+    // 🔥 Now accepting state parameter
+    public String getAuthorizationUrl(Long userId) {
+
         return AUTH_URL +
                 "?client_id=" + clientId +
                 "&redirect_uri=" + redirectUri +
                 "&response_type=code" +
                 "&scope=https://www.googleapis.com/auth/drive.file" +
                 "&access_type=offline" +
-                "&prompt=consent" ;
+                "&prompt=consent" +
+                "&state=" + userId;
     }
 
     public Map<String, Object> exchangeCodeForTokens(String code)
             throws Exception {
 
-        String body = "code=" + code +
-                "&client_id=" + clientId +
-                "&client_secret=" + clientSecret +
-                "&redirect_uri=" + redirectUri +
+        String body = "code=" + URLEncoder.encode(code, StandardCharsets.UTF_8) +
+                "&client_id=" + URLEncoder.encode(clientId, StandardCharsets.UTF_8) +
+                "&client_secret=" + URLEncoder.encode(clientSecret, StandardCharsets.UTF_8) +
+                "&redirect_uri=" + URLEncoder.encode(redirectUri, StandardCharsets.UTF_8) +
                 "&grant_type=authorization_code";
 
         HttpRequestFactory requestFactory =
@@ -51,7 +55,7 @@ public class GoogleOAuthService {
         HttpContent content =
                 new ByteArrayContent(
                         "application/x-www-form-urlencoded",
-                        body.getBytes());
+                        body.getBytes(StandardCharsets.UTF_8));
 
         HttpRequest request =
                 requestFactory.buildPostRequest(
@@ -63,7 +67,4 @@ public class GoogleOAuthService {
         return new ObjectMapper()
                 .readValue(response.getContent(), Map.class);
     }
-
-
-
 }
