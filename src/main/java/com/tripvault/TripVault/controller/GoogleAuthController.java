@@ -6,6 +6,7 @@ import com.tripvault.TripVault.service.GoogleOAuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
 
 import java.net.URI;
 import java.util.Map;
@@ -25,9 +26,14 @@ public class GoogleAuthController {
 
     // Step 1: Redirect to Google
     @GetMapping("/login")
-    public ResponseEntity<Void> redirectToGoogle(@RequestParam Long userId) {
+    public ResponseEntity<Void> redirectToGoogle(Authentication authentication) {
 
-        String url = googleOAuthService.getAuthorizationUrl(userId);
+        String username = authentication.getName();
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        String url = googleOAuthService.getAuthorizationUrl(user.getId());
 
         return ResponseEntity
                 .status(HttpStatus.FOUND)
@@ -49,14 +55,22 @@ public class GoogleAuthController {
         String accessToken = (String) tokens.get("access_token");
         String refreshToken = (String) tokens.get("refresh_token");
 
+        Map<String, Object> userInfo =
+                googleOAuthService.getUserInfo(accessToken);
+
+        String googleId = (String) userInfo.get("id");
+
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         user.setAccessToken(accessToken);
         user.setRefreshToken(refreshToken);
-
+        user.setGoogleId(googleId);
         userRepository.save(user);
 
         return ResponseEntity.ok("Google Drive Connected Successfully!");
     }
+
+
 }

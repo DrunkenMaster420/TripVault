@@ -2,6 +2,7 @@ package com.tripvault.TripVault.controller;
 
 import com.tripvault.TripVault.dto.LoginRequest;
 import com.tripvault.TripVault.dto.RegisterRequest;
+import com.tripvault.TripVault.model.Role;
 import com.tripvault.TripVault.model.User;
 import com.tripvault.TripVault.repository.UserRepository;
 import com.tripvault.TripVault.service.CustomUserDetailsService;
@@ -50,7 +51,7 @@ public class AuthController {
         newUser.setName(request.getName());
         newUser.setUsername(request.getUsername());
         newUser.setEmail(request.getEmail());
-
+        newUser.setRole(Role.ROLE_USER);
         newUser.setPassword(passwordEncoder.encode(request.getPassword()));
         newUser.setCreatedAt(LocalDateTime.now());
 

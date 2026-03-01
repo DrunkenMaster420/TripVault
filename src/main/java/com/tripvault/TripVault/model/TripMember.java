@@ -22,10 +22,17 @@ public class TripMember {
     private User user;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private TripRole role;
 
     @Column(name = "joined_at",updatable = false)
     private LocalDateTime joinedAt;
 
-    private Boolean isActive=true;
+    @Column(nullable = false)
+    private Boolean isActive = true;
+
+    @PrePersist
+    protected void onJoin() {
+        joinedAt = LocalDateTime.now();
+    }
 }

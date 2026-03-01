@@ -2,6 +2,7 @@ package com.tripvault.TripVault.controller;
 
 import com.tripvault.TripVault.model.User;
 import com.tripvault.TripVault.service.UserService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,11 +22,13 @@ public class UserController {
         return userService.saveUser(user);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public List<User> getAllUsers(){
         return userService.getAllUsers();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public void deleteUser(@PathVariable Long id){
         userService.deleteUser(id);

@@ -5,7 +5,10 @@ import com.google.api.client.http.*;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.net.URI;
 import java.net.URLEncoder;
+import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
@@ -66,5 +69,23 @@ public class GoogleOAuthService {
 
         return new ObjectMapper()
                 .readValue(response.getContent(), Map.class);
+    }
+
+    public Map<String, Object> getUserInfo(String accessToken) throws Exception {
+
+        String userInfoUrl = "https://www.googleapis.com/oauth2/v2/userinfo";
+
+        java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
+                .uri(URI.create(userInfoUrl))
+                .header("Authorization", "Bearer " + accessToken)
+                .GET()
+                .build();
+
+        java.net.http.HttpResponse<String> response =
+                HttpClient.newHttpClient()
+                        .send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
+
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(response.body(), Map.class);
     }
 }
