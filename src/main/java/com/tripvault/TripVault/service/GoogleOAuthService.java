@@ -1,11 +1,10 @@
 package com.tripvault.TripVault.service;
 
-import tools.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.*;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
@@ -33,11 +32,16 @@ public class GoogleOAuthService {
     // 🔥 Now accepting state parameter
     public String getAuthorizationUrl(Long userId) {
 
+        String scope = URLEncoder.encode(
+                "https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.profile",
+                StandardCharsets.UTF_8
+        );
+
         return AUTH_URL +
                 "?client_id=" + clientId +
                 "&redirect_uri=" + redirectUri +
                 "&response_type=code" +
-                "&scope=https://www.googleapis.com/auth/drive.file" +
+                "&scope=" + scope +
                 "&access_type=offline" +
                 "&prompt=consent" +
                 "&state=" + userId;
@@ -46,29 +50,29 @@ public class GoogleOAuthService {
     public Map<String, Object> exchangeCodeForTokens(String code)
             throws Exception {
 
-        String body = "code=" + URLEncoder.encode(code, StandardCharsets.UTF_8) +
-                "&client_id=" + URLEncoder.encode(clientId, StandardCharsets.UTF_8) +
-                "&client_secret=" + URLEncoder.encode(clientSecret, StandardCharsets.UTF_8) +
-                "&redirect_uri=" + URLEncoder.encode(redirectUri, StandardCharsets.UTF_8) +
-                "&grant_type=authorization_code";
+        String body =
+                "code=" + URLEncoder.encode(code, StandardCharsets.UTF_8) +
+                        "&client_id=" + URLEncoder.encode(clientId, StandardCharsets.UTF_8) +
+                        "&client_secret=" + URLEncoder.encode(clientSecret, StandardCharsets.UTF_8) +
+                        "&redirect_uri=" + URLEncoder.encode(redirectUri, StandardCharsets.UTF_8) +
+                        "&grant_type=authorization_code";
 
-        HttpRequestFactory requestFactory =
-                new NetHttpTransport().createRequestFactory();
+        java.net.http.HttpRequest request =
+                java.net.http.HttpRequest.newBuilder()
+                        .uri(URI.create(TOKEN_URL))
+                        .header("Content-Type", "application/x-www-form-urlencoded")
+                        .POST(java.net.http.HttpRequest.BodyPublishers.ofString(body))
+                        .build();
 
-        HttpContent content =
-                new ByteArrayContent(
-                        "application/x-www-form-urlencoded",
-                        body.getBytes(StandardCharsets.UTF_8));
+        java.net.http.HttpResponse<String> response =
+                HttpClient.newHttpClient()
+                        .send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
 
-        HttpRequest request =
-                requestFactory.buildPostRequest(
-                        new GenericUrl(TOKEN_URL),
-                        content);
+        System.out.println("TOKEN RESPONSE BODY = " + response.body());
 
-        HttpResponse response = request.execute();
+        ObjectMapper mapper = new ObjectMapper();
 
-        return new ObjectMapper()
-                .readValue(response.getContent(), Map.class);
+        return mapper.readValue(response.body(), Map.class);
     }
 
     public Map<String, Object> getUserInfo(String accessToken) throws Exception {

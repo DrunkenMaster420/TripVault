@@ -58,8 +58,10 @@ public class GoogleAuthController {
         Map<String, Object> userInfo =
                 googleOAuthService.getUserInfo(accessToken);
 
+        System.out.println("User Info From Google: " + userInfo);
         String googleId = (String) userInfo.get("id");
 
+        System.out.println("Google ID: " + googleId);
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
