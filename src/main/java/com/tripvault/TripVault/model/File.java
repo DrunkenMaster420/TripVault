@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "files")
@@ -24,4 +26,8 @@ public class File {
 
     @ManyToOne
     private User user;
+
+    @OneToMany(mappedBy = "file")
+    @OrderBy("chunkIndex ASC")
+    private List<FileChunk> chunks = new ArrayList<>();
 }

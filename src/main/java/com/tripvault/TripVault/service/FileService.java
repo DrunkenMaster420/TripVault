@@ -19,6 +19,7 @@ public class FileService {
 
     private final FileRepository fileRepository;
     private final FileChunkRepository chunkRepository;
+    private final GoogleDriveService googleDriveService;
 
     public void uploadFile(MultipartFile multipartFile, User user) throws Exception {
 
@@ -37,13 +38,22 @@ public class FileService {
         int index = 0;
 
         for (byte[] chunk : chunks) {
+            String chunkFileName =
+                    file.getFileName() + "_chunk_" + index;
+
+            String driveFileId =
+                    googleDriveService.uploadChunk(
+                            chunk,
+                            chunkFileName,
+                            user
+                    );
 
             FileChunk fileChunk = new FileChunk();
 
             fileChunk.setChunkIndex(index);
             fileChunk.setChunkSize((long) chunk.length);
+            fileChunk.setDriveFileId(driveFileId);
             fileChunk.setFile(file);
-
             chunkRepository.save(fileChunk);
 
             index++;
