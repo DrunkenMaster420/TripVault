@@ -6,10 +6,13 @@ import com.tripvault.TripVault.model.User;
 import com.tripvault.TripVault.repository.FileChunkRepository;
 import com.tripvault.TripVault.repository.FileRepository;
 import com.tripvault.TripVault.storage.ChunkSplitter;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -18,8 +21,10 @@ import java.util.List;
 public class FileService {
 
     private final FileRepository fileRepository;
+    private final FileChunkRepository fileChunkRepository;
     private final FileChunkRepository chunkRepository;
     private final GoogleDriveService googleDriveService;
+    private final UserService userService;
 
     public void uploadFile(MultipartFile multipartFile, User user) throws Exception {
 
@@ -54,9 +59,77 @@ public class FileService {
             fileChunk.setChunkSize((long) chunk.length);
             fileChunk.setDriveFileId(driveFileId);
             fileChunk.setFile(file);
+            System.out.println("Saving chunk " + index);
             chunkRepository.save(fileChunk);
+            System.out.println("Saved chunk " + index);
 
             index++;
         }
+    }
+
+    public byte[] downloadFile(Long fileId,User user)throws IOException {
+
+        System.out.println("STEP 4");
+         File file=fileRepository.findById(fileId).orElseThrow(()->new RuntimeException("File Not Found"));
+
+        System.out.println("STEP 5");
+         List<FileChunk> chunks=fileChunkRepository.findByFileOrderByChunkIndexAsc(file);
+
+        System.out.println("Chunks found: " + chunks.size());
+        ByteArrayOutputStream outputStream=new ByteArrayOutputStream();
+
+        for(FileChunk chunk:chunks){
+            System.out.println("Downloading chunk: " + chunk.getChunkIndex());
+            try {
+
+                byte[] chunkData = googleDriveService.downloadChunk(
+                        chunk.getDriveFileId(),
+                        user
+                );
+
+                System.out.println("Chunk downloaded successfully");
+
+                outputStream.write(chunkData);
+                System.out.println("Chunk written");
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return outputStream.toByteArray();
+    }
+
+    public File getFileById(Long fileId) {
+        return fileRepository.findById(fileId).orElseThrow(()->new RuntimeException("File Not Found"));
+    }
+
+    @Transactional
+    public void deleteFile(Long fileId, User user) {
+
+        File file = fileRepository.findById(fileId)
+                .orElseThrow(() -> new RuntimeException("File not found"));
+
+        List<FileChunk> chunks =
+                fileChunkRepository.findByFileOrderByChunkIndexAsc(file);
+
+        for (FileChunk chunk : chunks) {
+
+            System.out.println("Deleting chunk: " + chunk.getChunkIndex());
+
+            googleDriveService.deleteChunk(
+                    chunk.getDriveFileId(),
+                    user
+            );
+
+            System.out.println("Chunk deleted from Google Drive");
+        }
+
+        fileChunkRepository.deleteByFile(file);
+
+        System.out.println("Chunk metadata deleted");
+
+        fileRepository.delete(file);
+
+        System.out.println("File metadata deleted");
     }
 }

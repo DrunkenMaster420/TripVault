@@ -79,19 +79,20 @@ public class GoogleDriveService {
 
     }
 
-    public void deleteChunk(String driveFileId,
-                            User user) {
+    public void deleteChunk(String driveFileId, User user) {
 
         try {
 
-            Drive drive=getDriveService(user);
+            Drive driveService = getDriveService(user);
 
-            drive.files().delete(driveFileId).execute();
+            driveService.files()
+                    .delete(driveFileId)
+                    .execute();
 
         } catch (Exception e) {
-            throw new RuntimeException("Failed to delete chunk",e);
+            throw new RuntimeException("Failed to delete chunk", e);
         }
-
     }
+
 
 }
