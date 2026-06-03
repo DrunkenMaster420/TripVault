@@ -25,9 +25,13 @@ public class FileController {
     private final UserRepository userRepository;
     private final UserService userService;
 
-    @PostMapping("/upload")
+    @PostMapping(
+            value = "/upload",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
     public String upload(
-            @RequestParam MultipartFile file
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("tripId") Long tripId
     ) throws Exception {
 
         Authentication authentication =
@@ -38,7 +42,7 @@ public class FileController {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        fileService.uploadFile(file, user);
+        fileService.uploadFile(file, tripId,user);
 
         return "Uploaded";
     }

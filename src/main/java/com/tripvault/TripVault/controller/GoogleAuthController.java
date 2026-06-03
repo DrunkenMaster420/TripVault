@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
 
 import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @RestController
@@ -67,7 +68,15 @@ public class GoogleAuthController {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         user.setAccessToken(accessToken);
-        user.setRefreshToken(refreshToken);
+        if (refreshToken != null && !refreshToken.isBlank()) {
+            user.setRefreshToken(refreshToken);
+        }
+        Number expiresIn = (Number) tokens.get("expires_in");
+
+        user.setTokenExpiry(
+                LocalDateTime.now()
+                        .plusSeconds(expiresIn.longValue())
+        );
         user.setGoogleId(googleId);
         userRepository.save(user);
 

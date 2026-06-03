@@ -35,6 +35,9 @@ public class User {
     @Column(name = "refresh_token", length = 1000)
     private String refreshToken;
 
+    @Column(name = "token_expiry")
+    private LocalDateTime tokenExpiry;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 

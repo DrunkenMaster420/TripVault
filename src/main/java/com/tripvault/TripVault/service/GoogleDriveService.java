@@ -8,6 +8,7 @@ import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.tripvault.TripVault.model.User;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.google.api.services.drive.model.File;
 
@@ -15,13 +16,18 @@ import java.io.ByteArrayOutputStream;
 
 
 @Service
+@RequiredArgsConstructor
 public class GoogleDriveService {
 
+    private final GoogleTokenService googleTokenService;
     private static final String ApplicationName="TripVault";
 
     private Drive getDriveService(User user){
         try{
-            AccessToken accessToken=new AccessToken(user.getAccessToken(), null);
+            String validAccessToken =
+                    googleTokenService.getValidAccessToken(user);
+
+            AccessToken accessToken=new AccessToken(validAccessToken, null);
 
             GoogleCredentials credentials=GoogleCredentials.create(accessToken);
 

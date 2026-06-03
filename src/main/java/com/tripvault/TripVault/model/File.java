@@ -27,6 +27,10 @@ public class File {
     @ManyToOne
     private User user;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "trip_id", nullable = false)
+    private Trip trip;
+
     @OneToMany(mappedBy = "file")
     @OrderBy("chunkIndex ASC")
     private List<FileChunk> chunks = new ArrayList<>();

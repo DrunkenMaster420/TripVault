@@ -19,6 +19,10 @@ public class FileChunk {
     private String driveFileId;
 
     @ManyToOne
+    @JoinColumn(name = "storage_owner_id")
+    private User storageOwner;
+
+    @ManyToOne
     @JoinColumn(name = "file_id")
     private File file;
 }
