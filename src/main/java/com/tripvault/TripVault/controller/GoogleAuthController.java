@@ -1,6 +1,8 @@
 package com.tripvault.TripVault.controller;
 
+import com.tripvault.TripVault.model.StorageAccount;
 import com.tripvault.TripVault.model.User;
+import com.tripvault.TripVault.repository.StorageAccountRepository;
 import com.tripvault.TripVault.repository.UserRepository;
 import com.tripvault.TripVault.service.GoogleOAuthService;
 import org.springframework.http.HttpStatus;
@@ -18,11 +20,13 @@ public class GoogleAuthController {
 
     private final GoogleOAuthService googleOAuthService;
     private final UserRepository userRepository;
+    private final StorageAccountRepository storageAccountRepository;
 
     public GoogleAuthController(GoogleOAuthService googleOAuthService,
-                                UserRepository userRepository) {
+                                UserRepository userRepository, StorageAccountRepository storageAccountRepository) {
         this.googleOAuthService = googleOAuthService;
         this.userRepository = userRepository;
+        this.storageAccountRepository=storageAccountRepository;
     }
 
     // Step 1: Redirect to Google
@@ -67,18 +71,36 @@ public class GoogleAuthController {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        user.setAccessToken(accessToken);
-        if (refreshToken != null && !refreshToken.isBlank()) {
-            user.setRefreshToken(refreshToken);
-        }
-        Number expiresIn = (Number) tokens.get("expires_in");
+        Number expiresIn =
+                (Number) tokens.get("expires_in");
 
-        user.setTokenExpiry(
+        StorageAccount storageAccount =
+                new StorageAccount();
+
+        storageAccount.setOwner(user);
+
+        storageAccount.setAccessToken(accessToken);
+
+        storageAccount.setRefreshToken(refreshToken);
+
+        storageAccount.setTokenExpiry(
                 LocalDateTime.now()
                         .plusSeconds(expiresIn.longValue())
         );
-        user.setGoogleId(googleId);
-        userRepository.save(user);
+
+        storageAccount.setGoogleEmail(
+                (String) userInfo.get("email")
+        );
+
+        storageAccount.setTotalQuota(
+                15L * 1024 * 1024 * 1024
+        );
+
+        storageAccount.setUsedQuota(0L);
+
+        storageAccount.setActive(true);
+
+        storageAccountRepository.save(storageAccount);
 
         return ResponseEntity.ok("Google Drive Connected Successfully!");
     }

@@ -7,6 +7,7 @@ import com.google.api.services.drive.Drive;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.GoogleCredentials;
+import com.tripvault.TripVault.model.StorageAccount;
 import com.tripvault.TripVault.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,10 +23,11 @@ public class GoogleDriveService {
     private final GoogleTokenService googleTokenService;
     private static final String ApplicationName="TripVault";
 
-    private Drive getDriveService(User user){
+    private Drive getDriveService(StorageAccount storageAccount){
         try{
-            String validAccessToken =
-                    googleTokenService.getValidAccessToken(user);
+            String validAccessToken = googleTokenService.getValidAccessToken(
+                    storageAccount
+            );
 
             AccessToken accessToken=new AccessToken(validAccessToken, null);
 
@@ -45,9 +47,9 @@ public class GoogleDriveService {
 
     public String uploadChunk(byte[] chunkData,
                               String fileName,
-                              User user) {
+                              StorageAccount storageAccount) {
         try{
-            Drive drive=getDriveService(user);
+            Drive drive=getDriveService(storageAccount);
             File metaData=new File();
             metaData.setName(fileName);
 
@@ -67,11 +69,11 @@ public class GoogleDriveService {
     }
 
     public byte[] downloadChunk(String driveFileId,
-                                User user) {
+                                StorageAccount storageAccount) {
 
         try{
 
-            Drive drive=getDriveService(user);
+            Drive drive=getDriveService(storageAccount);
 
             ByteArrayOutputStream outputStream=new ByteArrayOutputStream();
 
@@ -85,11 +87,11 @@ public class GoogleDriveService {
 
     }
 
-    public void deleteChunk(String driveFileId, User user) {
+    public void deleteChunk(String driveFileId, StorageAccount storageAccount) {
 
         try {
 
-            Drive driveService = getDriveService(user);
+            Drive driveService = getDriveService(storageAccount);
 
             driveService.files()
                     .delete(driveFileId)

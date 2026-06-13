@@ -18,11 +18,12 @@ public class FileChunk {
 
     private String driveFileId;
 
-    @ManyToOne
-    @JoinColumn(name = "storage_owner_id")
-    private User storageOwner;
 
     @ManyToOne
     @JoinColumn(name = "file_id")
     private File file;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "storage_account_id")
+    private StorageAccount storageAccount;
 }

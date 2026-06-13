@@ -1,13 +1,7 @@
 package com.tripvault.TripVault.service;
 
-import com.tripvault.TripVault.model.File;
-import com.tripvault.TripVault.model.FileChunk;
-import com.tripvault.TripVault.model.Trip;
-import com.tripvault.TripVault.model.User;
-import com.tripvault.TripVault.repository.FileChunkRepository;
-import com.tripvault.TripVault.repository.FileRepository;
-import com.tripvault.TripVault.repository.TripMemberRepository;
-import com.tripvault.TripVault.repository.TripRepository;
+import com.tripvault.TripVault.model.*;
+import com.tripvault.TripVault.repository.*;
 import com.tripvault.TripVault.storage.ChunkSplitter;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +23,8 @@ public class FileService {
     private final GoogleDriveService googleDriveService;
     private final TripRepository tripRepository;
     private final TripMemberRepository tripMemberRepository;
+    private final StorageAllocationService storageAllocationService;
+    private final StorageAccountRepository storageAccountRepository;
 
     public void uploadFile(MultipartFile multipartFile,Long tripId ,User user) throws Exception {
 
@@ -56,16 +52,30 @@ public class FileService {
 
         int index = 0;
 
+
+
         for (byte[] chunk : chunks) {
             String chunkFileName =
                     file.getFileName() + "_chunk_" + index;
+
+            StorageAccount storageAccount =
+                    storageAllocationService.allocate(
+                            (long) chunk.length
+                    );
 
             String driveFileId =
                     googleDriveService.uploadChunk(
                             chunk,
                             chunkFileName,
-                            user
+                            storageAccount
+
                     );
+
+            storageAccount.setUsedQuota(
+                    storageAccount.getUsedQuota() + chunk.length
+            );
+
+            storageAccountRepository.save(storageAccount);
 
             FileChunk fileChunk = new FileChunk();
 
@@ -73,7 +83,7 @@ public class FileService {
             fileChunk.setChunkSize((long) chunk.length);
             fileChunk.setDriveFileId(driveFileId);
             fileChunk.setFile(file);
-            fileChunk.setStorageOwner(user);
+            fileChunk.setStorageAccount(storageAccount);
             System.out.println("Saving chunk " + index);
             chunkRepository.save(fileChunk);
             System.out.println("Saved chunk " + index);
@@ -104,7 +114,7 @@ public class FileService {
 
                 byte[] chunkData = googleDriveService.downloadChunk(
                         chunk.getDriveFileId(),
-                        chunk.getStorageOwner()
+                        chunk.getStorageAccount()
                 );
 
                 System.out.println("Chunk downloaded successfully");
@@ -147,10 +157,20 @@ public class FileService {
 
             System.out.println("Deleting chunk: " + chunk.getChunkIndex());
 
+            StorageAccount storageAccount =
+                    chunk.getStorageAccount();
+
             googleDriveService.deleteChunk(
                     chunk.getDriveFileId(),
-                    chunk.getStorageOwner()
+                    storageAccount
             );
+
+            storageAccount.setUsedQuota(
+                    storageAccount.getUsedQuota()
+                            - chunk.getChunkSize()
+            );
+
+            storageAccountRepository.save(storageAccount);
 
             System.out.println("Chunk deleted from Google Drive");
         }

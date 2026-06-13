@@ -1,7 +1,9 @@
 package com.tripvault.TripVault.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tripvault.TripVault.model.StorageAccount;
 import com.tripvault.TripVault.model.User;
+import com.tripvault.TripVault.repository.StorageAccountRepository;
 import com.tripvault.TripVault.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 
@@ -23,6 +25,7 @@ import java.util.Map;
 public class GoogleTokenService {
 
     private final UserRepository userRepository;
+    private final StorageAccountRepository storageAccountRepository;
 
     @Value("${google.client.id}")
     private String clientId;
@@ -30,24 +33,24 @@ public class GoogleTokenService {
     @Value("${google.client.secret}")
     private String clientSecret;
 
-    private boolean isExpired(User user) {
+    private boolean isExpired(StorageAccount storageAccount) {
 
-        return user.getTokenExpiry() == null ||
-                user.getTokenExpiry()
+        return storageAccount.getTokenExpiry() == null ||
+                storageAccount.getTokenExpiry()
                         .isBefore(LocalDateTime.now().plusMinutes(5));
     }
 
-    public String refreshAccessToken(User user) throws Exception {
+    public String refreshAccessToken(StorageAccount storageAccount) throws Exception {
 
         System.out.println(
                 "Refreshing Google token for user: "
-                        + user.getUsername()
+                        + storageAccount.getOwner()
         );
 
         String body =
                 "client_id=" + URLEncoder.encode(clientId, StandardCharsets.UTF_8) +
                         "&client_secret=" + URLEncoder.encode(clientSecret, StandardCharsets.UTF_8) +
-                        "&refresh_token=" + URLEncoder.encode(user.getRefreshToken(), StandardCharsets.UTF_8) +
+                        "&refresh_token=" + URLEncoder.encode(storageAccount.getRefreshToken(), StandardCharsets.UTF_8) +
                         "&grant_type=refresh_token";
 
         HttpRequest request =
@@ -79,24 +82,24 @@ public class GoogleTokenService {
         Number expiresIn =
                 (Number) tokenResponse.get("expires_in");
 
-        user.setAccessToken(newAccessToken);
+        storageAccount.setAccessToken(newAccessToken);
 
-        user.setTokenExpiry(
+        storageAccount.setTokenExpiry(
                 LocalDateTime.now()
                         .plusSeconds(expiresIn.longValue())
         );
 
-        userRepository.save(user);
+        storageAccountRepository.save(storageAccount);
 
         return newAccessToken;
     }
 
-    public String getValidAccessToken(User user) throws Exception {
+    public String getValidAccessToken(StorageAccount storageAccount) throws Exception {
 
-        if (isExpired(user)) {
-            return refreshAccessToken(user);
+        if (isExpired(storageAccount)) {
+            return refreshAccessToken(storageAccount);
         }
 
-        return user.getAccessToken();
+        return storageAccount.getAccessToken();
     }
 }

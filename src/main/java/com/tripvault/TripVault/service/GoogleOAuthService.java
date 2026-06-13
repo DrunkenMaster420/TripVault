@@ -31,7 +31,7 @@ public class GoogleOAuthService {
     public String getAuthorizationUrl(Long userId) {
 
         String scope = URLEncoder.encode(
-                "https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.profile",
+                "https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email",
                 StandardCharsets.UTF_8
         );
 
