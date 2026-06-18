@@ -2,14 +2,14 @@ package com.tripvault.TripVault.service;
 
 import com.tripvault.TripVault.model.*;
 import com.tripvault.TripVault.repository.*;
-import com.tripvault.TripVault.storage.ChunkSplitter;
+import com.tripvault.TripVault.storage.StreamingChunkReader;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -48,15 +48,27 @@ public class FileService {
 
         file = fileRepository.save(file);
 
-        List<byte[]> chunks = ChunkSplitter.splitFile(multipartFile);
+
+        InputStream inputStream =
+                multipartFile.getInputStream();
 
         int index = 0;
 
+        while (true) {
 
+            byte[] chunk =
+                    StreamingChunkReader.readChunk(
+                            inputStream
+                    );
 
-        for (byte[] chunk : chunks) {
+            if (chunk == null) {
+                break;
+            }
+
             String chunkFileName =
-                    file.getFileName() + "_chunk_" + index;
+                    file.getFileName()
+                            + "_chunk_"
+                            + index;
 
             StorageAccount storageAccount =
                     storageAllocationService.allocate(
@@ -68,31 +80,37 @@ public class FileService {
                             chunk,
                             chunkFileName,
                             storageAccount
-
                     );
 
             storageAccount.setUsedQuota(
-                    storageAccount.getUsedQuota() + chunk.length
+                    storageAccount.getUsedQuota()
+                            + chunk.length
             );
 
             storageAccountRepository.save(storageAccount);
 
-            FileChunk fileChunk = new FileChunk();
+            FileChunk fileChunk =
+                    new FileChunk();
 
             fileChunk.setChunkIndex(index);
-            fileChunk.setChunkSize((long) chunk.length);
-            fileChunk.setDriveFileId(driveFileId);
+            fileChunk.setChunkSize(
+                    (long) chunk.length
+            );
+            fileChunk.setDriveFileId(
+                    driveFileId
+            );
             fileChunk.setFile(file);
-            fileChunk.setStorageAccount(storageAccount);
-            System.out.println("Saving chunk " + index);
+            fileChunk.setStorageAccount(
+                    storageAccount
+            );
+
             chunkRepository.save(fileChunk);
-            System.out.println("Saved chunk " + index);
 
             index++;
         }
     }
 
-    public byte[] downloadFile(Long fileId,User user)throws IOException {
+    public void downloadFile(Long fileId, User user, OutputStream outputStream)throws IOException {
 
 
 
@@ -106,27 +124,25 @@ public class FileService {
          List<FileChunk> chunks=fileChunkRepository.findByFileOrderByChunkIndexAsc(file);
 
         System.out.println("Chunks found: " + chunks.size());
-        ByteArrayOutputStream outputStream=new ByteArrayOutputStream();
 
         for(FileChunk chunk:chunks){
             System.out.println("Downloading chunk: " + chunk.getChunkIndex());
             try {
 
-                byte[] chunkData = googleDriveService.downloadChunk(
+                googleDriveService.downloadChunk(
                         chunk.getDriveFileId(),
-                        chunk.getStorageAccount()
+                        chunk.getStorageAccount(),
+                        outputStream
                 );
 
                 System.out.println("Chunk downloaded successfully");
 
-                outputStream.write(chunkData);
                 System.out.println("Chunk written");
 
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        return outputStream.toByteArray();
     }
 
     public File getFileById(Long fileId) {

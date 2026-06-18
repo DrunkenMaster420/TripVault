@@ -8,12 +8,10 @@ import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.tripvault.TripVault.model.StorageAccount;
-import com.tripvault.TripVault.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.google.api.services.drive.model.File;
-
-import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
 
 
 @Service
@@ -68,18 +66,17 @@ public class GoogleDriveService {
 
     }
 
-    public byte[] downloadChunk(String driveFileId,
-                                StorageAccount storageAccount) {
+    public void downloadChunk(String driveFileId,
+                                StorageAccount storageAccount,
+                                OutputStream outputStream) {
 
         try{
 
             Drive drive=getDriveService(storageAccount);
 
-            ByteArrayOutputStream outputStream=new ByteArrayOutputStream();
 
             drive.files().get(driveFileId).executeMediaAndDownloadTo(outputStream);
 
-            return outputStream.toByteArray();
 
         } catch (Exception e) {
             throw new RuntimeException("Failed to download chunk",e);

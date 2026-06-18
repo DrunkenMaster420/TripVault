@@ -5,6 +5,7 @@ import com.tripvault.TripVault.model.User;
 import com.tripvault.TripVault.repository.UserRepository;
 import com.tripvault.TripVault.service.FileService;
 import com.tripvault.TripVault.service.UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -48,15 +49,36 @@ public class FileController {
     }
 
     @GetMapping("/download/{fileId}")
-    public ResponseEntity<byte[]> downloadFile(@PathVariable Long fileId,Authentication authentication)throws IOException {
-        User user=userService.findByUsername(authentication.getName());
-        byte[] fileData=fileService.downloadFile(fileId,user);
-        File file=fileService.getFileById(fileId);
+    public void downloadFile(
+            @PathVariable Long fileId,
+            HttpServletResponse response,
+            Authentication authentication
+    ) throws IOException {
 
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION,"attachment,filename=\""+file.getFileName()+"\"")
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(fileData);
+        User user = userService.findByUsername(
+                authentication.getName()
+        );
+
+        File file = fileService.getFileById(fileId);
+
+        response.setContentType(
+                file.getContentType()
+        );
+
+        response.setHeader(
+                HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=\"" +
+                        file.getFileName() +
+                        "\""
+        );
+
+        fileService.downloadFile(
+                fileId,
+                user,
+                response.getOutputStream()
+        );
+
+        response.flushBuffer();
     }
 
     @DeleteMapping("/{fileId}")
