@@ -11,7 +11,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 
 @Service
 @RequiredArgsConstructor
@@ -25,8 +28,13 @@ public class FileService {
     private final TripMemberRepository tripMemberRepository;
     private final StorageAllocationService storageAllocationService;
     private final StorageAccountRepository storageAccountRepository;
+    private final ExecutorService uploadExecutor;
 
-    public void uploadFile(MultipartFile multipartFile,Long tripId ,User user) throws Exception {
+    public void uploadFile(
+            MultipartFile multipartFile,
+            Long tripId,
+            User user
+    ) throws Exception {
 
         validateTripMembership(
                 tripId,
@@ -39,18 +47,28 @@ public class FileService {
 
         File file = new File();
 
-        file.setFileName(multipartFile.getOriginalFilename());
-        file.setFileSize(multipartFile.getSize());
-        file.setContentType(multipartFile.getContentType());
-        file.setUploadedAt(LocalDateTime.now());
+        file.setFileName(
+                multipartFile.getOriginalFilename()
+        );
+        file.setFileSize(
+                multipartFile.getSize()
+        );
+        file.setContentType(
+                multipartFile.getContentType()
+        );
+        file.setUploadedAt(
+                LocalDateTime.now()
+        );
         file.setUser(user);
         file.setTrip(trip);
 
         file = fileRepository.save(file);
 
-
         InputStream inputStream =
                 multipartFile.getInputStream();
+
+        List<CompletableFuture<Void>> futures =
+                new ArrayList<>();
 
         int index = 0;
 
@@ -65,49 +83,116 @@ public class FileService {
                 break;
             }
 
-            String chunkFileName =
-                    file.getFileName()
-                            + "_chunk_"
-                            + index;
+            final int chunkIndex = index;
+            final byte[] chunkData = chunk;
+            final File savedFile = file;
 
-            StorageAccount storageAccount =
-                    storageAllocationService.allocate(
-                            (long) chunk.length
-                    );
+            CompletableFuture<Void> future =
+                    CompletableFuture.runAsync(() -> {
 
-            String driveFileId =
-                    googleDriveService.uploadChunk(
-                            chunk,
-                            chunkFileName,
-                            storageAccount
-                    );
+                        StorageAccount storageAccount = null;
 
-            storageAccount.setUsedQuota(
-                    storageAccount.getUsedQuota()
-                            + chunk.length
-            );
+                        try {
 
-            storageAccountRepository.save(storageAccount);
+                            storageAccount =
+                                    storageAllocationService.allocate(
+                                            (long) chunkData.length
+                                    );
 
-            FileChunk fileChunk =
-                    new FileChunk();
+                            String chunkFileName =
+                                    savedFile.getFileName()
+                                            + "_chunk_"
+                                            + chunkIndex;
 
-            fileChunk.setChunkIndex(index);
-            fileChunk.setChunkSize(
-                    (long) chunk.length
-            );
-            fileChunk.setDriveFileId(
-                    driveFileId
-            );
-            fileChunk.setFile(file);
-            fileChunk.setStorageAccount(
-                    storageAccount
-            );
+                            String driveFileId =
+                                    googleDriveService.uploadChunk(
+                                            chunkData,
+                                            chunkFileName,
+                                            storageAccount
+                                    );
 
-            chunkRepository.save(fileChunk);
+                            FileChunk fileChunk =
+                                    new FileChunk();
+
+                            fileChunk.setChunkIndex(
+                                    chunkIndex
+                            );
+
+                            fileChunk.setChunkSize(
+                                    (long) chunkData.length
+                            );
+
+                            fileChunk.setDriveFileId(
+                                    driveFileId
+                            );
+
+                            fileChunk.setFile(
+                                    savedFile
+                            );
+
+                            fileChunk.setStorageAccount(
+                                    storageAccount
+                            );
+
+                            chunkRepository.save(
+                                    fileChunk
+                            );
+
+                            System.out.println(
+                                    "Uploaded chunk "
+                                            + chunkIndex
+                                            + " to account "
+                                            + storageAccount.getId()
+                            );
+
+                        } catch (Exception e) {
+
+                            if (storageAccount != null) {
+
+                                synchronized (storageAllocationService) {
+
+                                    storageAccount.setUsedQuota(
+                                            storageAccount.getUsedQuota()
+                                                    - chunkData.length
+                                    );
+
+                                    storageAccountRepository.save(
+                                            storageAccount
+                                    );
+                                }
+                            }
+
+                            throw new RuntimeException(e);
+                        }
+
+                    }, uploadExecutor);
+
+            futures.add(future);
 
             index++;
         }
+
+        try {
+
+            CompletableFuture.allOf(
+                    futures.toArray(
+                            new CompletableFuture[0]
+                    )
+            ).join();
+
+        } catch (Exception e) {
+
+            fileRepository.delete(file);
+
+            throw new RuntimeException(
+                    "Upload failed",
+                    e
+            );
+        }
+
+        System.out.println(
+                "File upload completed successfully"
+        );
     }
 
     public void downloadFile(Long fileId, User user, OutputStream outputStream)throws IOException {
@@ -129,18 +214,46 @@ public class FileService {
             System.out.println("Downloading chunk: " + chunk.getChunkIndex());
             try {
 
+                System.out.println(
+                        "Chunk "
+                                + chunk.getChunkIndex()
+                                + " Account "
+                                + chunk.getStorageAccount().getId()
+                );
+
+                System.out.println(
+                        "START chunk " +
+                                chunk.getChunkIndex()
+                );
+
                 googleDriveService.downloadChunk(
                         chunk.getDriveFileId(),
                         chunk.getStorageAccount(),
                         outputStream
                 );
 
+                System.out.println(
+                        "END chunk " +
+                                chunk.getChunkIndex()
+                );
+
                 System.out.println("Chunk downloaded successfully");
 
                 System.out.println("Chunk written");
 
-            } catch (Exception e) {
-                e.printStackTrace();
+            }catch (Exception e) {
+
+                System.out.println(
+                        "Failed chunk index: "
+                                + chunk.getChunkIndex()
+                );
+
+                System.out.println(
+                        "Drive file id: "
+                                + chunk.getDriveFileId()
+                );
+
+                throw e;
             }
         }
     }

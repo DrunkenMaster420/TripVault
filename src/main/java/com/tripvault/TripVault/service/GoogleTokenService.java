@@ -44,7 +44,7 @@ public class GoogleTokenService {
 
         System.out.println(
                 "Refreshing Google token for user: "
-                        + storageAccount.getOwner()
+                        + storageAccount.getId()
         );
 
         String body =

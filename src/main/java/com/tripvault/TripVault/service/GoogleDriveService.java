@@ -79,7 +79,17 @@ public class GoogleDriveService {
 
 
         } catch (Exception e) {
-            throw new RuntimeException("Failed to download chunk",e);
+            e.printStackTrace();
+
+            System.out.println(
+                    "Failed file id: " + driveFileId
+            );
+
+            throw new RuntimeException(
+                    "Failed to download chunk",
+                    e
+            );
+
         }
 
     }
@@ -98,6 +108,7 @@ public class GoogleDriveService {
             throw new RuntimeException("Failed to delete chunk", e);
         }
     }
+
 
 
 }

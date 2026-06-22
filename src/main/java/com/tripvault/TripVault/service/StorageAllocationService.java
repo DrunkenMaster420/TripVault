@@ -3,6 +3,7 @@ package com.tripvault.TripVault.service;
 import com.tripvault.TripVault.model.StorageAccount;
 import com.tripvault.TripVault.repository.AllocationStrategy;
 import com.tripvault.TripVault.repository.StorageAccountRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,14 +16,29 @@ public class StorageAllocationService {
     private final StorageAccountRepository storageAccountRepository;
     private final AllocationStrategy allocationStrategy;
 
-    public StorageAccount allocate(Long chunkSize){
+    @Transactional
+    public synchronized StorageAccount allocate(
+            Long chunkSize
+    ) {
+
         List<StorageAccount> accounts =
                 storageAccountRepository.findByActiveTrue();
 
-        return allocationStrategy.selectAccount(
-                accounts,
-                chunkSize
-        );
-    }
+        StorageAccount account =
+                allocationStrategy.selectAccount(
+                        accounts,
+                        chunkSize
+                );
 
+        account.setUsedQuota(
+                account.getUsedQuota()
+                        + chunkSize
+        );
+
+        storageAccountRepository.saveAndFlush(
+                account
+        );
+
+        return account;
+    }
 }
