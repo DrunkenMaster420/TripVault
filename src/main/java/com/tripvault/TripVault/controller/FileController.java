@@ -14,8 +14,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import com.tripvault.TripVault.dto.FileResponse;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/files")
@@ -25,6 +27,12 @@ public class FileController {
     private final FileService fileService;
     private final UserRepository userRepository;
     private final UserService userService;
+
+    @GetMapping("/trip/{tripId}")
+    public List<FileResponse> getFiles(@PathVariable Long tripId) {
+
+        return fileService.getFiles(tripId);
+    }
 
     @PostMapping(
             value = "/upload",

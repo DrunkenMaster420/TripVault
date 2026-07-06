@@ -71,6 +71,8 @@ public class TripMemberService {
         tripMemberRepository.delete(member);
     }
 
+
+
     private TripMemberResponse mapToResponse(TripMember member) {
 
         TripMemberStorage storage = tripMemberStorageRepository

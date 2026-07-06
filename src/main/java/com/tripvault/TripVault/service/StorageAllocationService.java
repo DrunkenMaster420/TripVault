@@ -1,5 +1,6 @@
 package com.tripvault.TripVault.service;
 
+    import com.tripvault.TripVault.dto.DriveStorageInfo;
 import com.tripvault.TripVault.model.StorageAccount;
 import com.tripvault.TripVault.repository.AllocationStrategy;
 import com.tripvault.TripVault.repository.StorageAccountRepository;
@@ -15,6 +16,7 @@ public class StorageAllocationService {
 
     private final StorageAccountRepository storageAccountRepository;
     private final AllocationStrategy allocationStrategy;
+    private final GoogleDriveService googleDriveService;
 
     @Transactional
     public synchronized StorageAccount allocate(
@@ -24,6 +26,16 @@ public class StorageAllocationService {
         List<StorageAccount> accounts =
                 storageAccountRepository.findByActiveTrue();
 
+        for (StorageAccount account : accounts) {
+
+            DriveStorageInfo storageInfo =
+                    googleDriveService.getStorageInfo(account);
+
+            account.setTotalQuota(storageInfo.getTotalQuota());
+            account.setUsedQuota(storageInfo.getUsedQuota());
+
+            storageAccountRepository.save(account);
+        }
         StorageAccount account =
                 allocationStrategy.selectAccount(
                         accounts,
@@ -38,6 +50,8 @@ public class StorageAllocationService {
         storageAccountRepository.saveAndFlush(
                 account
         );
+
+
 
         return account;
     }

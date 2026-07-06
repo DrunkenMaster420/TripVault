@@ -1,7 +1,9 @@
 package com.tripvault.TripVault.service;
 
+import com.tripvault.TripVault.dto.UserResponse;
 import com.tripvault.TripVault.model.User;
 import com.tripvault.TripVault.repository.UserRepository;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -29,8 +31,26 @@ public class UserService {
         userRepository.deleteById(id);
     }
 
+
+
     public User findByUsername(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+
+    public UserResponse getCurrentUser(Authentication authentication) {
+
+        String username = authentication.getName();
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        UserResponse response = new UserResponse();
+
+        response.setId(user.getId());
+        response.setUsername(user.getUsername());
+
+        return response;
     }
 }

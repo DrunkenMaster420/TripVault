@@ -16,12 +16,12 @@ public class LeastUsedStrategy implements AllocationStrategy {
     ) {
 
         return accounts.stream()
-                .filter(a ->
-                        a.getTotalQuota()
-                                - a.getUsedQuota()
-                                >= chunkSize)
-                .min(Comparator.comparing(
-                        StorageAccount::getUsedQuota))
-                .orElseThrow();
+                .filter(account ->
+                        account.getTotalQuota() - account.getUsedQuota() >= chunkSize)
+                .max(Comparator.comparing(
+                        account -> account.getTotalQuota() - account.getUsedQuota()
+                ))
+                .orElseThrow(() ->
+                        new RuntimeException("No storage account has enough free space."));
     }
 }

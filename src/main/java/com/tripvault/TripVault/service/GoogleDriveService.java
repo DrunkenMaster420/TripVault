@@ -4,13 +4,18 @@ import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.ByteArrayContent;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.drive.Drive;
+import com.google.api.services.drive.model.About;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.GoogleCredentials;
+import com.tripvault.TripVault.dto.DriveStorageInfo;
 import com.tripvault.TripVault.model.StorageAccount;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.google.api.services.drive.model.File;
+
+
+import java.io.IOException;
 import java.io.OutputStream;
 
 
@@ -106,6 +111,29 @@ public class GoogleDriveService {
 
         } catch (Exception e) {
             throw new RuntimeException("Failed to delete chunk", e);
+        }
+    }
+
+    public DriveStorageInfo getStorageInfo(StorageAccount storageAccount) {
+        try {
+            Drive drive = getDriveService(storageAccount);
+
+            About about = drive.about()
+                    .get()
+                    .setFields("storageQuota")
+                    .execute();
+
+            About.StorageQuota quota = about.getStorageQuota();
+
+            DriveStorageInfo info = new DriveStorageInfo();
+
+            info.setTotalQuota(quota.getLimit());
+            info.setUsedQuota(quota.getUsage());
+
+            return info;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to fetch Google Drive storage information", e);
         }
     }
 

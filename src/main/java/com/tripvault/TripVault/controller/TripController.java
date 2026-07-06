@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/trips")
 public class TripController {
@@ -30,5 +32,33 @@ public class TripController {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         return tripService.createTrip(loggedUser.getId(),trip);
+    }
+
+    @GetMapping
+    public List<Trip> getMyTrips() {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String username = authentication.getName();
+
+        User loggedUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return tripService.getTripsForUser(loggedUser.getId());
+    }
+
+    @GetMapping("/{tripId}")
+    public Trip getTripById(@PathVariable Long tripId) {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String username = authentication.getName();
+
+        User loggedUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return tripService.getTripById(loggedUser.getId(), tripId);
     }
 }

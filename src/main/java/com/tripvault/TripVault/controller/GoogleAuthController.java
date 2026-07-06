@@ -1,9 +1,11 @@
 package com.tripvault.TripVault.controller;
 
+import com.tripvault.TripVault.dto.DriveStorageInfo;
 import com.tripvault.TripVault.model.StorageAccount;
 import com.tripvault.TripVault.model.User;
 import com.tripvault.TripVault.repository.StorageAccountRepository;
 import com.tripvault.TripVault.repository.UserRepository;
+import com.tripvault.TripVault.service.GoogleDriveService;
 import com.tripvault.TripVault.service.GoogleOAuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,17 +23,19 @@ public class GoogleAuthController {
     private final GoogleOAuthService googleOAuthService;
     private final UserRepository userRepository;
     private final StorageAccountRepository storageAccountRepository;
+    private final GoogleDriveService googleDriveService;
 
     public GoogleAuthController(GoogleOAuthService googleOAuthService,
-                                UserRepository userRepository, StorageAccountRepository storageAccountRepository) {
+                                UserRepository userRepository, StorageAccountRepository storageAccountRepository, GoogleDriveService googleDriveService) {
         this.googleOAuthService = googleOAuthService;
         this.userRepository = userRepository;
         this.storageAccountRepository=storageAccountRepository;
+        this.googleDriveService = googleDriveService;
     }
 
     // Step 1: Redirect to Google
     @GetMapping("/login")
-    public ResponseEntity<Void> redirectToGoogle(Authentication authentication) {
+    public ResponseEntity<String> redirectToGoogle(Authentication authentication) {
 
         String username = authentication.getName();
 
@@ -40,10 +44,7 @@ public class GoogleAuthController {
 
         String url = googleOAuthService.getAuthorizationUrl(user.getId());
 
-        return ResponseEntity
-                .status(HttpStatus.FOUND)
-                .location(URI.create(url))
-                .build();
+        return ResponseEntity.ok(url);
     }
 
     // Step 2: Handle callback
@@ -92,17 +93,20 @@ public class GoogleAuthController {
                 (String) userInfo.get("email")
         );
 
-        storageAccount.setTotalQuota(
-                15L * 1024 * 1024 * 1024
-        );
+        DriveStorageInfo storageInfo =
+                googleDriveService.getStorageInfo(storageAccount);
 
-        storageAccount.setUsedQuota(0L);
+        storageAccount.setTotalQuota(storageInfo.getTotalQuota());
+        storageAccount.setUsedQuota(storageInfo.getUsedQuota());
 
         storageAccount.setActive(true);
 
         storageAccountRepository.save(storageAccount);
 
-        return ResponseEntity.ok("Google Drive Connected Successfully!");
+        return ResponseEntity
+                .status(HttpStatus.FOUND)
+                .location(URI.create("http://localhost:5173/storage-accounts"))
+                .build();
     }
 
 

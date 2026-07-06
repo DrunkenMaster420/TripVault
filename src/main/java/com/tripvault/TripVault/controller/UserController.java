@@ -1,8 +1,10 @@
 package com.tripvault.TripVault.controller;
 
+import com.tripvault.TripVault.dto.UserResponse;
 import com.tripvault.TripVault.model.User;
 import com.tripvault.TripVault.service.UserService;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,5 +39,10 @@ public class UserController {
     @GetMapping("/{id}")
     public User getUserById(@PathVariable Long id){
         return userService.getUserById(id);
+    }
+
+    @GetMapping("/me")
+    public UserResponse me(Authentication authentication) {
+        return userService.getCurrentUser(authentication);
     }
 }

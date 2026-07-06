@@ -1,5 +1,6 @@
 package com.tripvault.TripVault.service;
 
+import com.tripvault.TripVault.dto.FileResponse;
 import com.tripvault.TripVault.model.*;
 import com.tripvault.TripVault.repository.*;
 import com.tripvault.TripVault.storage.StreamingChunkReader;
@@ -262,6 +263,16 @@ public class FileService {
         return fileRepository.findById(fileId).orElseThrow(()->new RuntimeException("File Not Found"));
     }
 
+    public List<FileResponse> getFiles(Long tripId) {
+
+        System.out.println("Service reached");
+
+        return fileRepository.findByTrip_Id(tripId)
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
     @Transactional
     public void deleteFile(Long fileId, User user) {
 
@@ -330,5 +341,18 @@ public class FileService {
                     "Access denied"
             );
         }
+    }
+
+    private FileResponse mapToResponse(File file) {
+
+        FileResponse response = new FileResponse();
+
+        response.setId(file.getId());
+        response.setFileName(file.getFileName());
+        response.setFileSize(file.getFileSize());
+        response.setContentType(file.getContentType());
+        response.setUploadedAt(file.getUploadedAt());
+
+        return response;
     }
 }

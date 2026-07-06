@@ -15,4 +15,6 @@ public interface TripMemberRepository extends JpaRepository<TripMember,Long> {
             Long tripId,
             Long userId
     );
+
+    List<TripMember> findByUser_IdAndIsActiveTrue(Long userId);
 }
