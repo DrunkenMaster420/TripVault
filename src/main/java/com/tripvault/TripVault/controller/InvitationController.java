@@ -77,5 +77,5 @@ public class InvitationController {
                 authentication.getName()
         );
     }
-    //Testingg
+    //Testing
 }
