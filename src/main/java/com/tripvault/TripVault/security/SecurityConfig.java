@@ -41,8 +41,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        // This will match /api/auth/... OR /api/v1/auth/... seamlessly
-                        .requestMatchers("/api/**/auth/**", "/api/**/ai/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/api/v1/auth/**", "/api/v1/auth/google/**", "/api/v1/ai/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
