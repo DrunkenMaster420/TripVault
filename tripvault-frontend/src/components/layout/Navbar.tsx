@@ -1,10 +1,27 @@
 import { AppBar, Toolbar, Typography, Button, Stack } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
 import { removeToken } from "../../utils/AuthUtils";
+import Badge from "@mui/material/Badge";
+import { useEffect, useState } from "react";
+import { getMyInvitations } from "../../services/InvitationService";
 
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [invitationCount, setInvitationCount] = useState(0);
+
+  useEffect(() => {
+    const loadCount = async () => {
+      try {
+        const invitations = await getMyInvitations();
+        setInvitationCount(invitations.length);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    loadCount();
+  }, []);
 
   const logout = () => {
     removeToken();
@@ -55,6 +72,19 @@ const Navbar = () => {
           </Button>
 
           <Button color="inherit">AI</Button>
+
+          <Badge
+            badgeContent={invitationCount}
+            color="error"
+            invisible={invitationCount === 0}
+          >
+            <Button
+              variant="contained"
+              onClick={() => navigate("/invitations")}
+            >
+              Invitations
+            </Button>
+          </Badge>
 
           <Button variant="contained" color="error" onClick={logout}>
             Logout

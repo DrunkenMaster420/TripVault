@@ -1,36 +1,18 @@
-import axios from "axios";
-import { getToken } from "../utils/AuthUtils";
-
-const API_BASE_URL = "http://localhost:8080";
+import api from "../api/axios";
 
 export const getTrips = async () => {
-    const token = getToken();
+  const response = await api.get("/api/trips");
 
-    const response = await axios.get(`${API_BASE_URL}/api/trips`, {
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
-    }
-    );
-
-    return response.data;
-}
+  return response.data;
+};
 
 export const createTrip = async (name: string, description: string) => {
-    const token = getToken();
-    const response = await axios.post(`${API_BASE_URL}/api/trips`,
-        { name, description },
-        { headers: { Authorization: `Bearer ${token}`, }, });
+  const response = await api.post(`/api/trips`, { name, description });
 
-    return response.data;
-}
+  return response.data;
+};
 
 export const getTripById = async (tripId: number) => {
-    const token = getToken();
-    const response=await axios.get(`${API_BASE_URL}/api/trips/${tripId}`, {
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
-    });
-    return response.data;
-}
+  const response = await api.get(`/api/trips/${tripId}`);
+  return response.data;
+};

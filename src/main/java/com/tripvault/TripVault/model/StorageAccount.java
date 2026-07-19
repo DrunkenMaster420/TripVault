@@ -7,7 +7,14 @@ import java.time.LocalDateTime;
 
 @Entity
 @Data
-@Table(name = "storage_accounts")
+@Table(
+        name = "storage_accounts",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        columnNames = {"owner_user_id", "google_id"}
+                )
+        }
+)
 public class StorageAccount {
 
     @Id
@@ -19,6 +26,9 @@ public class StorageAccount {
     private User owner;
 
     private String googleEmail;
+
+    @Column(nullable = false)
+    private String googleId;
 
     @Column(length = 3000)
     private String accessToken;

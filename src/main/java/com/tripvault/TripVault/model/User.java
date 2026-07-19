@@ -29,15 +29,6 @@ public class User {
     @Column(name = "google_id", unique = true)
     private String googleId;
 
-    @Column(name = "access_token", length = 1000)
-    private String accessToken;
-
-    @Column(name = "refresh_token", length = 1000)
-    private String refreshToken;
-
-    @Column(name = "token_expiry")
-    private LocalDateTime tokenExpiry;
-
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 

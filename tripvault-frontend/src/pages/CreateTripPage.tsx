@@ -48,7 +48,7 @@ const CreateTripPage = () => {
             boxShadow: "0 20px 60px rgba(0,0,0,0.08)",
           }}
         >
-          <Typography variant="h3" fontWeight={700} sx={{ mb: 1 }}>
+          <Typography variant="h3" sx={{ mb: 1, fontWeight: 700 }}>
             Create a Trip
           </Typography>
 

@@ -76,9 +76,13 @@ public class GoogleAuthController {
                 (Number) tokens.get("expires_in");
 
         StorageAccount storageAccount =
-                new StorageAccount();
+                storageAccountRepository
+                        .findByOwnerAndGoogleId(user, googleId)
+                        .orElse(new StorageAccount());
 
         storageAccount.setOwner(user);
+
+        storageAccount.setGoogleId(googleId);
 
         storageAccount.setAccessToken(accessToken);
 
@@ -93,6 +97,7 @@ public class GoogleAuthController {
                 (String) userInfo.get("email")
         );
 
+
         DriveStorageInfo storageInfo =
                 googleDriveService.getStorageInfo(storageAccount);
 
@@ -105,7 +110,7 @@ public class GoogleAuthController {
 
         return ResponseEntity
                 .status(HttpStatus.FOUND)
-                .location(URI.create("http://localhost:5173/storage-accounts"))
+                .location(URI.create("http://localhost/storage-accounts"))
                 .build();
     }
 

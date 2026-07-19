@@ -53,7 +53,7 @@ function DashboardPage() {
         }}
       >
         <Box>
-          <Typography variant="h3" fontWeight={700}>
+          <Typography variant="h3" sx={{ fontWeight: 700 }}>
             Welcome{user ? `, ${user.username}` : ""} 👋
           </Typography>
 
@@ -83,7 +83,7 @@ function DashboardPage() {
           <Card sx={{ p: 2, height: "100%" }}>
             <CardContent>
               <Folder fontSize="large" color="primary" />
-              <Typography variant="h3" fontWeight={700} sx={{ mt: 2 }}>
+              <Typography variant="h3" sx={{ mt: 2, fontWeight: 700 }}>
                 {trips.length}
               </Typography>
               <Typography color="text.secondary">Total Trips</Typography>
@@ -95,7 +95,7 @@ function DashboardPage() {
           <Card sx={{ p: 2, height: "100%" }}>
             <CardContent>
               <Storage fontSize="large" color="primary" />
-              <Typography variant="h3" fontWeight={700} sx={{ mt: 2 }}>
+              <Typography variant="h3" sx={{ mt: 2, fontWeight: 700 }}>
                 ∞
               </Typography>
               <Typography color="text.secondary">
@@ -109,7 +109,7 @@ function DashboardPage() {
           <Card sx={{ p: 2, height: "100%" }}>
             <CardContent>
               <CloudDone fontSize="large" color="primary" />
-              <Typography variant="h3" fontWeight={700} sx={{ mt: 2 }}>
+              <Typography variant="h3" sx={{ mt: 2, fontWeight: 700 }}>
                 Active
               </Typography>
               <Typography color="text.secondary">Cloud Sync</Typography>
@@ -119,7 +119,7 @@ function DashboardPage() {
       </Grid>
 
       {/* Trips */}
-      <Typography variant="h4" fontWeight={700} sx={{ mb: 3 }}>
+      <Typography variant="h4" sx={{ mb: 3, fontWeight: 700 }}>
         My Trips
       </Typography>
 
@@ -139,7 +139,7 @@ function DashboardPage() {
               }}
             >
               <CardContent>
-                <Typography variant="h5" fontWeight={700}>
+                <Typography variant="h5" sx={{ fontWeight: 700 }}>
                   {trip.name}
                 </Typography>
 
@@ -155,9 +155,11 @@ function DashboardPage() {
 
                 <Stack
                   direction="row"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  sx={{ mt: 4 }}
+                  sx={{
+                    mt: 4,
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
                 >
                   <Typography variant="body2" color="text.secondary">
                     Distributed Storage

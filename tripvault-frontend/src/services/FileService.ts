@@ -1,59 +1,28 @@
-import axios from "axios";
-import { getToken } from "../utils/AuthUtils";
-
-const API_BASE_URL = "http://localhost:8080";
+import api from "../api/axios";
 
 export const downloadFile = async (fileId: number) => {
-  const token = getToken();
-
-  const response = await axios.get(
-    `${API_BASE_URL}/api/files/download/${fileId}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      responseType: "blob",
-    },
-  );
+  const response = await api.get(`/api/files/download/${fileId}`, {
+    responseType: "blob",
+  });
 
   return response;
 };
 
 export const getFiles = async (tripId: number) => {
-  const token = getToken();
-
-  const response = await axios.get(`${API_BASE_URL}/api/files/trip/${tripId}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const response = await api.get(`/api/files/trip/${tripId}`);
 
   return response.data;
 };
 
 export const deleteFile = async (fileId: number) => {
-  const token = getToken();
-
-  await axios.delete(`${API_BASE_URL}/api/files/${fileId}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  await api.delete(`/api/files/${fileId}`);
 };
 
 export const uploadFile = async (tripId: number, file: File) => {
-  const token = getToken();
-
   const formData = new FormData();
 
   formData.append("file", file);
   formData.append("tripId", tripId.toString());
 
-  await axios.post(`${API_BASE_URL}/api/files/upload`, formData, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  await api.post(`/api/files/upload`, formData, {});
 };
-
-

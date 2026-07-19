@@ -1,28 +1,13 @@
-import axios from "axios";
-import { getToken } from "../utils/AuthUtils";
-
-const API_BASE_URL = "http://localhost:8080";
+import api from "../api/axios";
 
 export const getStorageAccounts = async () => {
-  const token = getToken();
-
-  const response = await axios.get(`${API_BASE_URL}/api/storage-accounts`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const response = await api.get(`/api/storage-accounts`);
 
   return response.data;
 };
 
 export const getGoogleLoginUrl = async () => {
-  const token = getToken();
-
-  const response = await axios.get(`${API_BASE_URL}/api/auth/google/login`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const response = await api.get(`/api/auth/google/login`);
 
   return response.data;
 };

@@ -1,4 +1,4 @@
-import { Box, Container } from "@mui/material";
+import { Container } from "@mui/material";
 import type { ReactNode } from "react";
 import Navbar from "./Navbar";
 
@@ -14,7 +14,8 @@ const PageLayout = ({ children }: Props) => {
       <Container
         maxWidth="xl"
         sx={{
-          py: 5,
+          py: 4,
+          minHeight: "calc(100vh - 64px)",
         }}
       >
         {children}

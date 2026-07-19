@@ -1,19 +1,7 @@
-import axios from "axios";
-import { getToken } from "../utils/AuthUtils";
-
-const API_BASE_URL = "http://localhost:8080";
+import api from "../api/axios";
 
 export const getMembers = async (tripId: number) => {
-  const token = getToken();
-
-  const response = await axios.get(
-    `${API_BASE_URL}/api/trips/${tripId}/members`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    },
-  );
+  const response = await api.get(`/api/trips/${tripId}/members`);
 
   return response.data;
 };
@@ -23,21 +11,10 @@ export const addMember = async (
   userId: number,
   allocatedGB: number,
 ) => {
-  const token = getToken();
-
-  const response = await axios.post(
-    `${API_BASE_URL}/api/trips/${tripId}/members`,
-    {
-      userId,
-      allocatedBytes: allocatedGB * 1024 * 1024 * 1024,
-    },
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    },
-  );
+  const response = await api.post(`/api/trips/${tripId}/members`, {
+    userId,
+    allocatedBytes: allocatedGB * 1024 * 1024 * 1024,
+  });
 
   return response.data;
 };
-

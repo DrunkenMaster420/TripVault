@@ -10,14 +10,15 @@ import java.time.LocalDateTime;
         uniqueConstraints = @UniqueConstraint(columnNames = "trip_member_id")
 )
 @Data
-public class TripMemberStorage  {
+public class TripMemberStorage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "trip_member_id", nullable = false)
-    private Long tripMemberId;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "trip_member_id", nullable = false)
+    private TripMember tripMember;
 
     @Column(name = "allocated_bytes", nullable = false)
     private Long allocatedBytes;
@@ -27,4 +28,10 @@ public class TripMemberStorage  {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @PrePersist
+    @PreUpdate
+    public void updateTimestamp() {
+        updatedAt = LocalDateTime.now();
+    }
 }

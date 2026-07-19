@@ -43,12 +43,12 @@ public class TripMemberService {
 
         TripMember saved=tripMemberRepository.save(member);
 
-        TripMemberStorage storage=new TripMemberStorage();
-        storage.setTripMemberId(saved.getId());
+        TripMemberStorage storage = new TripMemberStorage();
+        storage.setTripMember(saved);
         storage.setAllocatedBytes(allocatedBytes);
         storage.setUsedBytes(0L);
-        tripMemberStorageRepository.save(storage);
 
+        tripMemberStorageRepository.save(storage);
         return mapToResponse(saved);
     }
 
@@ -76,7 +76,7 @@ public class TripMemberService {
     private TripMemberResponse mapToResponse(TripMember member) {
 
         TripMemberStorage storage = tripMemberStorageRepository
-                .findByTripMemberId(member.getId())
+                .findByTripMember(member)
                 .orElseThrow(() -> new RuntimeException("Storage not found"));
 
 

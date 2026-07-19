@@ -42,9 +42,14 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody RegisterRequest request) {
+        System.out.println("REGISTER API HIT");
 
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username is already taken!");
+            return ResponseEntity.badRequest().body("Username is already taken!");
+        }
+
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            return ResponseEntity.badRequest().body("Email is already registered!");
         }
 
         User newUser = new User();
@@ -53,7 +58,6 @@ public class AuthController {
         newUser.setEmail(request.getEmail());
         newUser.setRole(Role.ROLE_USER);
         newUser.setPassword(passwordEncoder.encode(request.getPassword()));
-        newUser.setCreatedAt(LocalDateTime.now());
 
         userRepository.save(newUser);
 
@@ -62,6 +66,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody LoginRequest request) {
+        System.out.println("LOGIN CONTROLLER HIT");
         try {
 
             authenticationManager.authenticate(

@@ -42,8 +42,8 @@ public class TripService {
         owner = tripMemberRepository.save(owner);
 
         TripMemberStorage storage = new TripMemberStorage();
-        storage.setTripMemberId(owner.getId());
-        storage.setAllocatedBytes(10L * 1024 * 1024 * 1024); // 10 GB
+        storage.setTripMember(owner);
+        storage.setAllocatedBytes(10L * 1024L * 1024L * 1024L); // 10 GB
         storage.setUsedBytes(0L);
 
         tripMemberStorageRepository.save(storage);

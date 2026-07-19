@@ -1,6 +1,8 @@
 package com.tripvault.TripVault.repository;
 
+import com.tripvault.TripVault.model.Trip;
 import com.tripvault.TripVault.model.TripMember;
+import com.tripvault.TripVault.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -17,4 +19,8 @@ public interface TripMemberRepository extends JpaRepository<TripMember,Long> {
     );
 
     List<TripMember> findByUser_IdAndIsActiveTrue(Long userId);
+
+    boolean existsByTripAndUser(Trip trip, User user);
+
+    List<TripMember> findByTripId(Long tripId);
 }
