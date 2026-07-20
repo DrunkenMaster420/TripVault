@@ -69,8 +69,7 @@ public class AuthController {
         try {
 
             authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
-            );
+                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
         } catch (Exception e) {
 
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
@@ -86,4 +85,9 @@ public class AuthController {
         return ResponseEntity.ok(response);
         //
     }
+    
+    @GetMapping("/health")
+public ResponseEntity<String> healthCheck() {
+    return ResponseEntity.ok("OK");
+}
 }
