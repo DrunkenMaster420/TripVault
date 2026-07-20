@@ -84,5 +84,6 @@ public class AuthController {
         response.put("token", jwt);
 
         return ResponseEntity.ok(response);
+        //
     }
 }
