@@ -47,6 +47,7 @@ function App() {
         }
       />
 
+      {/* Protected Routes */}
       <Route
         path="/storage-accounts"
         element={

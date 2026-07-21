@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 
 import PageLayout from "../components/layout/PageLayout";
+import { useSearchParams, useNavigate } from "react-router-dom";
 
 import type { StorageAccount } from "../types/StorageAccount";
 import {
@@ -21,6 +22,9 @@ import {
 const StorageAccountsPage = () => {
   const [storageAccounts, setStorageAccounts] = useState<StorageAccount[]>([]);
 
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+
   const fetchStorageAccounts = async () => {
     try {
       const accounts = await getStorageAccounts();
@@ -29,6 +33,14 @@ const StorageAccountsPage = () => {
       console.error(err);
     }
   };
+
+  useEffect(() => {
+    if (searchParams.get("auth") === "success") {
+      fetchStorageAccounts();
+      // Clean up the URL query param without triggering a full page reload
+      navigate("/storage-accounts", { replace: true });
+    }
+  }, [searchParams, navigate]);
 
   useEffect(() => {
     fetchStorageAccounts();
