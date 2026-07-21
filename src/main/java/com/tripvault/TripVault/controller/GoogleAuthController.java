@@ -96,7 +96,7 @@ private String frontendUrl;
         System.out.println("RESOLVED FRONTEND URL: " + frontendUrl);
 
         // Dynamic redirect to frontend URL
-        String redirectTarget = frontendUrl + "/storage-accounts";
+        String redirectTarget = frontendUrl + "/storage-accounts?auth=success";
 
         return ResponseEntity
                 .status(HttpStatus.FOUND)
