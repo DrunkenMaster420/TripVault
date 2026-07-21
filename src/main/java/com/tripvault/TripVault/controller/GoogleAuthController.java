@@ -26,8 +26,8 @@ public class GoogleAuthController {
     private final StorageAccountRepository storageAccountRepository;
     private final GoogleDriveService googleDriveService;
 
-    @Value("${app.frontend.url:http://localhost:5173}")
-    private String frontendUrl;
+   @Value("${app.frontend.url:${FRONTEND_URL:http://localhost:5173}}")
+private String frontendUrl;
 
     public GoogleAuthController(GoogleOAuthService googleOAuthService,
                                 UserRepository userRepository,
