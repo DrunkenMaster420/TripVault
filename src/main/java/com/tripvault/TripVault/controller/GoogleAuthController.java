@@ -7,10 +7,11 @@ import com.tripvault.TripVault.repository.StorageAccountRepository;
 import com.tripvault.TripVault.repository.UserRepository;
 import com.tripvault.TripVault.service.GoogleDriveService;
 import com.tripvault.TripVault.service.GoogleOAuthService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -25,18 +26,22 @@ public class GoogleAuthController {
     private final StorageAccountRepository storageAccountRepository;
     private final GoogleDriveService googleDriveService;
 
+    @Value("${app.frontend.url:http://localhost:5173}")
+    private String frontendUrl;
+
     public GoogleAuthController(GoogleOAuthService googleOAuthService,
-                                UserRepository userRepository, StorageAccountRepository storageAccountRepository, GoogleDriveService googleDriveService) {
+                                UserRepository userRepository,
+                                StorageAccountRepository storageAccountRepository,
+                                GoogleDriveService googleDriveService) {
         this.googleOAuthService = googleOAuthService;
         this.userRepository = userRepository;
-        this.storageAccountRepository=storageAccountRepository;
+        this.storageAccountRepository = storageAccountRepository;
         this.googleDriveService = googleDriveService;
     }
 
     // Step 1: Redirect to Google
     @GetMapping("/login")
     public ResponseEntity<String> redirectToGoogle(Authentication authentication) {
-
         String username = authentication.getName();
 
         User user = userRepository.findByUsername(username)
@@ -49,70 +54,51 @@ public class GoogleAuthController {
 
     // Step 2: Handle callback
     @GetMapping("/callback")
-    public ResponseEntity<String> handleCallback(
+    public ResponseEntity<Void> handleCallback(
             @RequestParam String code,
             @RequestParam String state) throws Exception {
 
         Long userId = Long.parseLong(state);
 
-        Map<String, Object> tokens =
-                googleOAuthService.exchangeCodeForTokens(code);
+        Map<String, Object> tokens = googleOAuthService.exchangeCodeForTokens(code);
 
         String accessToken = (String) tokens.get("access_token");
         String refreshToken = (String) tokens.get("refresh_token");
 
-        Map<String, Object> userInfo =
-                googleOAuthService.getUserInfo(accessToken);
-
-        System.out.println("User Info From Google: " + userInfo);
+        Map<String, Object> userInfo = googleOAuthService.getUserInfo(accessToken);
         String googleId = (String) userInfo.get("id");
-
-        System.out.println("Google ID: " + googleId);
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        Number expiresIn =
-                (Number) tokens.get("expires_in");
+        Number expiresIn = (Number) tokens.get("expires_in");
 
-        StorageAccount storageAccount =
-                storageAccountRepository
-                        .findByOwnerAndGoogleId(user, googleId)
-                        .orElse(new StorageAccount());
+        StorageAccount storageAccount = storageAccountRepository
+                .findByOwnerAndGoogleId(user, googleId)
+                .orElse(new StorageAccount());
 
         storageAccount.setOwner(user);
-
         storageAccount.setGoogleId(googleId);
-
         storageAccount.setAccessToken(accessToken);
-
         storageAccount.setRefreshToken(refreshToken);
-
         storageAccount.setTokenExpiry(
-                LocalDateTime.now()
-                        .plusSeconds(expiresIn.longValue())
+                LocalDateTime.now().plusSeconds(expiresIn.longValue())
         );
+        storageAccount.setGoogleEmail((String) userInfo.get("email"));
 
-        storageAccount.setGoogleEmail(
-                (String) userInfo.get("email")
-        );
-
-
-        DriveStorageInfo storageInfo =
-                googleDriveService.getStorageInfo(storageAccount);
-
+        DriveStorageInfo storageInfo = googleDriveService.getStorageInfo(storageAccount);
         storageAccount.setTotalQuota(storageInfo.getTotalQuota());
         storageAccount.setUsedQuota(storageInfo.getUsedQuota());
-
         storageAccount.setActive(true);
 
         storageAccountRepository.save(storageAccount);
 
+        // Dynamic redirect to frontend URL
+        String redirectTarget = frontendUrl + "/storage-accounts";
+
         return ResponseEntity
                 .status(HttpStatus.FOUND)
-                .location(URI.create("http://localhost/storage-accounts"))
+                .location(URI.create(redirectTarget))
                 .build();
     }
-
-
 }
