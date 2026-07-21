@@ -93,6 +93,8 @@ public class GoogleAuthController {
 
         storageAccountRepository.save(storageAccount);
 
+        System.out.println("RESOLVED FRONTEND URL: " + frontendUrl);
+
         // Dynamic redirect to frontend URL
         String redirectTarget = frontendUrl + "/storage-accounts";
 
