@@ -7,9 +7,11 @@ interface Props {
 
 function ProtectedRoute({ children }: Props) {
   const token = getToken();
+  console.log("🔒 [ProtectedRoute] Checking token:", token);
 
   if (!token) {
-    return <Navigate to="/" />;
+    console.error("❌ [ProtectedRoute] No token! Redirecting to /");
+    return <Navigate to="/" replace />;
   }
 
   return children;
