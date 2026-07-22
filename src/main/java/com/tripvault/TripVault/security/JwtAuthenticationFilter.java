@@ -26,14 +26,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        String path = request.getServletPath();
-        return path.startsWith("/api/auth/") || 
-               path.startsWith("/api/v1/auth/") || 
-               path.startsWith("/api/v1/ai/");
-    }
-
-    @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
@@ -66,9 +58,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
         } catch (Exception e) {
-            // Log the exception but allow the filter chain to continue.
-            // Spring Security will handle authorization on protected endpoints.
-            logger.error("Could not authenticate JWT token: " + e.getMessage());
+            // Log JWT exception gracefully so it doesn't break open unauthenticated filter flow
+            logger.error("JWT authentication error: " + e.getMessage());
         }
 
         filterChain.doFilter(request, response);
