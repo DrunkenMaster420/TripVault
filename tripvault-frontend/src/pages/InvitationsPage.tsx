@@ -43,13 +43,9 @@ const InvitationsPage = () => {
   const handleAccept = async (id: number) => {
     try {
       await acceptInvitation(id);
-
       setMessage("Invitation accepted.");
-
       navigate("/dashboard");
-
       setSnackbarOpen(true);
-
       loadInvitations();
     } catch (err) {
       console.error(err);
@@ -59,11 +55,8 @@ const InvitationsPage = () => {
   const handleReject = async (id: number) => {
     try {
       await rejectInvitation(id);
-
       setMessage("Invitation rejected.");
-
       setSnackbarOpen(true);
-
       loadInvitations();
     } catch (err) {
       console.error(err);
@@ -76,12 +69,16 @@ const InvitationsPage = () => {
         sx={{
           maxWidth: 800,
           mx: "auto",
+          px: { xs: 1, sm: 0 },
         }}
       >
         <Typography
+          variant="h4"
           sx={{
             mb: 4,
             mt: 2,
+            fontWeight: 700,
+            fontSize: { xs: "1.5rem", sm: "2rem" },
           }}
         >
           Trip Invitations
@@ -95,36 +92,42 @@ const InvitationsPage = () => {
 
         <Stack spacing={3}>
           {invitations.map((invitation) => (
-            <Card key={invitation.id}>
-              <CardContent>
+            <Card key={invitation.id} sx={{ borderRadius: 3 }}>
+              <CardContent sx={{ p: { xs: 2.5, sm: 3 } }}>
                 <Typography
                   variant="h6"
                   sx={{
                     fontWeight: 700,
+                    fontSize: { xs: "1.1rem", sm: "1.25rem" },
                   }}
                 >
                   {invitation.tripName}
                 </Typography>
 
-                <Typography color="text.secondary" sx={{ mt: 1 }}>
+                <Typography color="text.secondary" sx={{ mt: 0.5 }}>
                   {invitation.senderName} invited you
                 </Typography>
 
-                <Typography sx={{ mt: 2 }}>
+                <Typography sx={{ mt: 1.5, fontWeight: 500 }}>
                   💾 {invitation.allocatedQuota} GB allocated
                 </Typography>
 
-                <Typography variant="caption" color="text.secondary">
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ display: "block", mt: 1 }}
+                >
                   {new Date(invitation.createdAt).toLocaleString()}
                 </Typography>
 
                 <Stack
-                  sx={{
-                    mt: 3,
-                  }}
+                  direction={{ xs: "column", sm: "row" }}
+                  spacing={2}
+                  sx={{ mt: 3 }}
                 >
                   <Button
                     variant="contained"
+                    fullWidth
                     onClick={() => handleAccept(invitation.id)}
                   >
                     Accept
@@ -133,6 +136,7 @@ const InvitationsPage = () => {
                   <Button
                     variant="outlined"
                     color="error"
+                    fullWidth
                     onClick={() => handleReject(invitation.id)}
                   >
                     Reject

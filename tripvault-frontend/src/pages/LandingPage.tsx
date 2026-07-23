@@ -7,13 +7,19 @@ import {
   Stack,
   Container,
   Paper,
+  IconButton,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import MenuIcon from "@mui/icons-material/Menu";
+import CloseIcon from "@mui/icons-material/Close";
+import { useState } from "react";
+import { useNavigate, Navigate } from "react-router-dom";
 import "../styles/landing.css";
-import { Navigate } from "react-router-dom";
 import { getToken } from "../utils/AuthUtils";
-
-
 
 const drives = [
   {
@@ -31,21 +37,26 @@ const drives = [
 ];
 
 export default function LandingPage() {
-    const navigate = useNavigate();
-    if (getToken()) {
-      return <Navigate to="/dashboard" replace />;
-    }
+  const navigate = useNavigate();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  if (getToken()) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  const handleScrollTo = (id: string) => {
+    setMobileMenuOpen(false);
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  };
 
   return (
     <Box className="landing">
-      {/* Aurora */}
-
+      {/* Aurora Background Blobs */}
       <div className="blob blob1"></div>
       <div className="blob blob2"></div>
       <div className="blob blob3"></div>
 
       {/* Navbar */}
-
       <AppBar
         position="fixed"
         elevation={0}
@@ -55,56 +66,41 @@ export default function LandingPage() {
           borderBottom: "1px solid rgba(255,255,255,.08)",
         }}
       >
-        <Toolbar>
+        <Toolbar sx={{ px: { xs: 2, sm: 4 } }}>
           <Typography
             variant="h5"
             sx={{
               fontWeight: 700,
               flexGrow: 1,
               cursor: "pointer",
+              fontSize: { xs: "1.25rem", sm: "1.5rem" },
             }}
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
           >
             TripVault
           </Typography>
 
+          {/* Desktop Navigation */}
           <Stack
             direction="row"
             spacing={2}
             sx={{
+              display: { xs: "none", md: "flex" },
               alignItems: "center",
             }}
           >
-            <Button
-              color="inherit"
-              onClick={() =>
-                document
-                  .getElementById("features")
-                  ?.scrollIntoView({ behavior: "smooth" })
-              }
-            >
+            <Button color="inherit" onClick={() => handleScrollTo("features")}>
               Features
             </Button>
 
             <Button
               color="inherit"
-              onClick={() =>
-                document
-                  .getElementById("how-it-works")
-                  ?.scrollIntoView({ behavior: "smooth" })
-              }
+              onClick={() => handleScrollTo("how-it-works")}
             >
               How it Works
             </Button>
 
-            <Button
-              color="inherit"
-              onClick={() =>
-                document
-                  .getElementById("ai")
-                  ?.scrollIntoView({ behavior: "smooth" })
-              }
-            >
+            <Button color="inherit" onClick={() => handleScrollTo("ai")}>
               AI
             </Button>
 
@@ -124,16 +120,99 @@ export default function LandingPage() {
               Get Started Free
             </Button>
           </Stack>
+
+          {/* Mobile Hamburger Button */}
+          <IconButton
+            color="inherit"
+            edge="end"
+            onClick={() => setMobileMenuOpen(true)}
+            sx={{ display: { md: "none" } }}
+          >
+            <MenuIcon />
+          </IconButton>
         </Toolbar>
       </AppBar>
-      {/* Hero */}
 
+      {/* Mobile Menu Drawer */}
+      <Drawer
+        anchor="right"
+        open={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        slotProps={{
+          paper: {
+            sx: {
+              width: "80%",
+              maxWidth: 300,
+              bgcolor: "rgba(10,15,30,.96)",
+              backdropFilter: "blur(18px)",
+              color: "white",
+              p: 2,
+            },
+          },
+        }}
+      >
+        <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
+          <IconButton color="inherit" onClick={() => setMobileMenuOpen(false)}>
+            <CloseIcon />
+          </IconButton>
+        </Box>
+
+        <List>
+          <ListItem disablePadding>
+            <ListItemButton onClick={() => handleScrollTo("features")}>
+              <ListItemText primary="Features" />
+            </ListItemButton>
+          </ListItem>
+
+          <ListItem disablePadding>
+            <ListItemButton onClick={() => handleScrollTo("how-it-works")}>
+              <ListItemText primary="How it Works" />
+            </ListItemButton>
+          </ListItem>
+
+          <ListItem disablePadding>
+            <ListItemButton onClick={() => handleScrollTo("ai")}>
+              <ListItemText primary="AI" />
+            </ListItemButton>
+          </ListItem>
+
+          <ListItem disablePadding sx={{ mt: 2 }}>
+            <Button
+              fullWidth
+              variant="outlined"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                navigate("/login");
+              }}
+            >
+              Login
+            </Button>
+          </ListItem>
+
+          <ListItem disablePadding sx={{ mt: 1.5 }}>
+            <Button
+              fullWidth
+              variant="contained"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                navigate("/register");
+              }}
+            >
+              Get Started Free
+            </Button>
+          </ListItem>
+        </List>
+      </Drawer>
+
+      {/* Hero Section */}
       <Container
         maxWidth="xl"
         sx={{
           minHeight: "100vh",
           display: "flex",
           alignItems: "center",
+          pt: { xs: 12, md: 8 },
+          pb: { xs: 6, md: 8 },
         }}
       >
         <Box
@@ -144,20 +223,20 @@ export default function LandingPage() {
               xs: "1fr",
               md: "1.2fr 1fr",
             },
-            gap: 10,
+            gap: { xs: 5, md: 10 },
             alignItems: "center",
           }}
         >
-          {/* Left */}
-
+          {/* Left Text Column */}
           <Box>
             <Typography
-              variant="h2"
+              variant="h1"
               className="fadeUp"
               sx={{
                 fontWeight: 800,
                 lineHeight: 1.1,
-                mb: 4,
+                mb: 3,
+                fontSize: { xs: "2.25rem", sm: "3.5rem", md: "4.25rem" },
               }}
             >
               Store Every
@@ -180,7 +259,8 @@ export default function LandingPage() {
               sx={{
                 color: "#b6bfd2",
                 maxWidth: 650,
-                mb: 5,
+                mb: 4,
+                fontSize: { xs: "1rem", sm: "1.25rem" },
               }}
             >
               TripVault intelligently distributes files across multiple Google
@@ -188,7 +268,10 @@ export default function LandingPage() {
               storage with one simple dashboard.
             </Typography>
 
-            <Stack direction="row" spacing={3}>
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={{ xs: 2, sm: 3 }}
+            >
               <Button
                 size="large"
                 variant="contained"
@@ -196,6 +279,7 @@ export default function LandingPage() {
                   px: 5,
                   py: 1.5,
                   borderRadius: 3,
+                  width: { xs: "100%", sm: "auto" },
                 }}
                 onClick={() => navigate("/register")}
               >
@@ -209,6 +293,7 @@ export default function LandingPage() {
                   px: 5,
                   py: 1.5,
                   borderRadius: 3,
+                  width: { xs: "100%", sm: "auto" },
                 }}
               >
                 Watch Demo
@@ -216,12 +301,14 @@ export default function LandingPage() {
             </Stack>
           </Box>
 
-          {/* Right */}
-
+          {/* Right Cards Visual Column */}
           <Box
             sx={{
               position: "relative",
-              height: 500,
+              height: { xs: "auto", md: 500 },
+              display: "flex",
+              flexDirection: { xs: "column", md: "block" },
+              gap: { xs: 2, md: 0 },
             }}
           >
             {drives.map((drive, index) => (
@@ -229,33 +316,22 @@ export default function LandingPage() {
                 key={index}
                 className={`floating floating${index}`}
                 sx={{
-                  position: "absolute",
-                  width: 280,
+                  position: { xs: "relative", md: "absolute" },
+                  width: { xs: "100%", md: 280 },
                   p: 3,
                   borderRadius: 4,
                   background: "rgba(255,255,255,.07)",
                   backdropFilter: "blur(20px)",
                   border: "1px solid rgba(255,255,255,.12)",
-
-                  top: index * 120,
-                  left: index * 25,
+                  top: { md: index * 120 },
+                  left: { md: index * 25 },
                 }}
               >
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: 700,
-                  }}
-                >
+                <Typography variant="h6" sx={{ fontWeight: 700 }}>
                   {drive.name}
                 </Typography>
 
-                <Typography
-                  sx={{
-                    mt: 1,
-                    color: "#7dd3fc",
-                  }}
-                >
+                <Typography sx={{ mt: 1, color: "#7dd3fc" }}>
                   {drive.storage}
                 </Typography>
 
@@ -281,7 +357,9 @@ export default function LandingPage() {
           </Box>
         </Box>
       </Container>
-      <Container maxWidth="lg" sx={{ py: 12 }}>
+
+      {/* Stats Section */}
+      <Container id="features" maxWidth="lg" sx={{ py: { xs: 6, md: 10 } }}>
         <Box
           sx={{
             display: "grid",
@@ -289,7 +367,7 @@ export default function LandingPage() {
               xs: "1fr 1fr",
               md: "repeat(4,1fr)",
             },
-            gap: 4,
+            gap: { xs: 2, sm: 4 },
           }}
         >
           {[
@@ -302,7 +380,7 @@ export default function LandingPage() {
               key={label}
               className="featureCard"
               sx={{
-                p: 5,
+                p: { xs: 3, sm: 5 },
                 textAlign: "center",
                 background: "rgba(255,255,255,.05)",
                 backdropFilter: "blur(20px)",
@@ -314,6 +392,7 @@ export default function LandingPage() {
                 sx={{
                   fontWeight: 800,
                   color: "#60a5fa",
+                  fontSize: { xs: "2rem", sm: "3.5rem" },
                 }}
               >
                 {value}
@@ -321,8 +400,9 @@ export default function LandingPage() {
 
               <Typography
                 sx={{
-                  mt: 2,
+                  mt: 1,
                   color: "#b8c0d0",
+                  fontSize: { xs: "0.85rem", sm: "1rem" },
                 }}
               >
                 {label}
@@ -332,10 +412,14 @@ export default function LandingPage() {
         </Box>
       </Container>
 
-      <Container maxWidth="xl" sx={{ py: 12 }}>
+      {/* Why TripVault Section */}
+      <Container maxWidth="xl" sx={{ py: { xs: 6, md: 10 } }}>
         <Typography
+          variant="h3"
           sx={{
-            fontWeight: 700,
+            fontWeight: 800,
+            mb: 4,
+            fontSize: { xs: "1.75rem", sm: "2.5rem" },
           }}
         >
           Why TripVault?
@@ -344,14 +428,11 @@ export default function LandingPage() {
         <Box
           sx={{
             display: "grid",
-
             gridTemplateColumns: {
               xs: "1fr",
-
               md: "repeat(3,1fr)",
             },
-
-            gap: 5,
+            gap: { xs: 3, sm: 5 },
           }}
         >
           {[
@@ -360,13 +441,11 @@ export default function LandingPage() {
               title: "Distributed Storage",
               desc: "Automatically spreads files across multiple Google Drive accounts.",
             },
-
             {
               icon: "👥",
               title: "Trip Collaboration",
               desc: "Invite friends with dedicated storage allocations.",
             },
-
             {
               icon: "🤖",
               title: "AI Ready",
@@ -377,77 +456,58 @@ export default function LandingPage() {
               key={feature.title}
               className="featureCard"
               sx={{
-                p: 5,
-
+                p: { xs: 3, sm: 5 },
                 borderRadius: 5,
-
                 background: "rgba(255,255,255,.05)",
-
                 backdropFilter: "blur(20px)",
-
                 border: "1px solid rgba(255,255,255,.08)",
               }}
             >
-              <Typography variant="h1">{feature.icon}</Typography>
+              <Typography variant="h2">{feature.icon}</Typography>
 
               <Typography
                 variant="h5"
                 sx={{
                   mt: 3,
-
                   fontWeight: 700,
+                  fontSize: { xs: "1.25rem", sm: "1.5rem" },
                 }}
               >
                 {feature.title}
               </Typography>
 
-              <Typography
-                sx={{
-                  mt: 2,
-
-                  color: "#b7bfd3",
-                }}
-              >
+              <Typography sx={{ mt: 2, color: "#b7bfd3" }}>
                 {feature.desc}
               </Typography>
             </Paper>
           ))}
         </Box>
       </Container>
-      <Container
-        maxWidth="lg"
-        sx={{
-          py: 14,
-        }}
-      >
+
+      {/* How it Works Section */}
+      <Container id="how-it-works" maxWidth="lg" sx={{ py: { xs: 6, md: 10 } }}>
         <Typography
+          variant="h3"
           sx={{
             fontWeight: 800,
+            mb: 4,
+            fontSize: { xs: "1.75rem", sm: "2.5rem" },
           }}
         >
           How TripVault Works
         </Typography>
 
-        <Stack spacing={5}>
+        <Stack spacing={3}>
           {[
             "Create your Trip",
-
             "Connect Google Drives",
-
             "Upload Files",
-
             "Invite Members",
-
             "AI manages everything",
           ].map((step, index) => (
             <Box key={step} className="timeline">
               <Box className="circle">{index + 1}</Box>
-
-              <Typography
-                sx={{
-                  fontWeight: 700,
-                }}
-              >
+              <Typography sx={{ fontWeight: 700, fontSize: "1.1rem" }}>
                 {step}
               </Typography>
             </Box>
@@ -455,11 +515,12 @@ export default function LandingPage() {
         </Stack>
       </Container>
 
-      <Container maxWidth="xl" sx={{ py: 18 }}>
+      {/* AI Feature Block */}
+      <Container id="ai" maxWidth="xl" sx={{ py: { xs: 6, md: 10 } }}>
         <Paper
           sx={{
-            p: 8,
-            borderRadius: 8,
+            p: { xs: 4, sm: 8 },
+            borderRadius: { xs: 4, sm: 8 },
             overflow: "hidden",
             position: "relative",
             background: "linear-gradient(135deg,#111827,#1e1b4b,#0f172a)",
@@ -481,8 +542,11 @@ export default function LandingPage() {
           />
 
           <Typography
+            variant="h3"
             sx={{
-              fontWeight: 700,
+              fontWeight: 800,
+              mb: 2,
+              fontSize: { xs: "1.75rem", sm: "2.5rem" },
             }}
           >
             Meet TripVault AI
@@ -493,7 +557,8 @@ export default function LandingPage() {
             sx={{
               color: "#cbd5e1",
               maxWidth: 700,
-              mb: 6,
+              mb: 5,
+              fontSize: { xs: "0.95rem", sm: "1.25rem" },
             }}
           >
             TripVault is evolving into an AI-powered travel workspace. Soon
@@ -508,7 +573,7 @@ export default function LandingPage() {
                 xs: "1fr",
                 md: "repeat(2,1fr)",
               },
-              gap: 4,
+              gap: 3,
             }}
           >
             {[
@@ -523,80 +588,34 @@ export default function LandingPage() {
                 key={item}
                 className="featureCard"
                 sx={{
-                  p: 3,
+                  p: 2.5,
                   background: "rgba(255,255,255,.05)",
                 }}
               >
-                <Typography variant="h6">✓ {item}</Typography>
+                <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                  ✓ {item}
+                </Typography>
               </Paper>
             ))}
           </Box>
         </Paper>
       </Container>
 
-      {/* <Container maxWidth="xl" sx={{ py: 16 }}>
-        <Typography
-          sx={{
-            fontWeight: 700,
-          }}
-        >
-          Everything in One Dashboard
-        </Typography>
-
-        <Paper
-          className="dashboardPreview"
-          sx={{
-            height: 600,
-
-            borderRadius: 8,
-
-            overflow: "hidden",
-
-            background: "linear-gradient(135deg,#111827,#1f2937)",
-
-            border: "1px solid rgba(255,255,255,.08)",
-          }}
-        >
-          <Box className="browserBar" />
-
-          <Box
-            sx={{
-              display: "flex",
-
-              justifyContent: "center",
-
-              alignItems: "center",
-
-              height: "100%",
-            }}
-          >
-            <Typography variant="h4" color="#94a3b8">
-              Dashboard Screenshot Here
-            </Typography>
-          </Box>
-        </Paper>
-      </Container> */}
-
-      <Container
-        maxWidth="lg"
-        sx={{
-          py: 20,
-        }}
-      >
+      {/* Call To Action Banner */}
+      <Container maxWidth="lg" sx={{ py: { xs: 8, md: 14 } }}>
         <Paper
           sx={{
             textAlign: "center",
-
-            borderRadius: 8,
-
-            p: 8,
-
+            borderRadius: { xs: 4, sm: 8 },
+            p: { xs: 4, sm: 8 },
             background: "linear-gradient(135deg,#2563eb,#7c3aed)",
           }}
         >
           <Typography
+            variant="h3"
             sx={{
-              fontWeight: 700,
+              fontWeight: 800,
+              fontSize: { xs: "1.75rem", sm: "2.75rem" },
             }}
           >
             Ready to Organize Your Next Trip?
@@ -605,9 +624,9 @@ export default function LandingPage() {
           <Typography
             variant="h6"
             sx={{
-              mt: 3,
-
-              mb: 5,
+              mt: 2,
+              mb: 4,
+              fontSize: { xs: "1rem", sm: "1.25rem" },
             }}
           >
             Start using distributed cloud storage today.
@@ -616,16 +635,17 @@ export default function LandingPage() {
           <Button
             size="large"
             variant="contained"
+            onClick={() => navigate("/register")}
             sx={{
               background: "white",
-
               color: "#111",
-
-              px: 6,
-
-              py: 2,
-
+              px: { xs: 4, sm: 6 },
+              py: 1.5,
               fontWeight: 700,
+              width: { xs: "100%", sm: "auto" },
+              "&:hover": {
+                background: "#f1f5f9",
+              },
             }}
           >
             Get Started
@@ -633,74 +653,43 @@ export default function LandingPage() {
         </Paper>
       </Container>
 
+      {/* Footer */}
       <Box
         sx={{
-          py: 8,
+          py: 6,
           borderTop: "1px solid rgba(255,255,255,.08)",
         }}
       >
         <Container maxWidth="xl">
           <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={{ xs: 3, sm: 0 }}
             sx={{
               alignItems: "center",
               justifyContent: "space-between",
             }}
           >
-            <Box>
-              <Typography
-                sx={{
-                  fontWeight: 700,
-                }}
-              >
-                TripVault
-              </Typography>
-
-              <Typography color="#94a3b8">
+            <Box sx={{ textAlign: { xs: "center", sm: "left" } }}>
+              <Typography sx={{ fontWeight: 700 }}>TripVault</Typography>
+              <Typography variant="body2" color="#94a3b8">
                 Distributed Cloud Storage Platform
               </Typography>
             </Box>
 
-            <Stack direction="row" spacing={4}>
-              <Button color="inherit">GitHub</Button>
-
-              <Button color="inherit">LinkedIn</Button>
-
-              <Button color="inherit">Documentation</Button>
+            <Stack direction="row" spacing={2}>
+              <Button color="inherit" size="small">
+                GitHub
+              </Button>
+              <Button color="inherit" size="small">
+                LinkedIn
+              </Button>
+              <Button color="inherit" size="small">
+                Docs
+              </Button>
             </Stack>
           </Stack>
         </Container>
       </Box>
-
-      {/* <Container
-        maxWidth="lg"
-        sx={{
-          py: 15,
-        }}
-      >
-        <Typography
-          sx={{
-            fontWeight: 700,
-          }}
-        >
-          One Upload. Unlimited Storage.
-        </Typography>
-
-        <Box className="architecture">
-          <Box className="upload">⬆️ Upload</Box>
-
-          <Box className="vault">TripVault</Box>
-
-          <Box className="drives">
-            <Paper className="drive">Google Drive A</Paper>
-
-            <Paper className="drive">Google Drive B</Paper>
-
-            <Paper className="drive">Google Drive C</Paper>
-
-            <Paper className="drive">Google Drive D</Paper>
-          </Box>
-        </Box>
-      </Container> */}
     </Box>
   );
 }

@@ -1,9 +1,17 @@
-import { Box, Button, Paper, TextField, Typography, Link } from "@mui/material";
+import {
+  Box,
+  Button,
+  Paper,
+  TextField,
+  Typography,
+  Link,
+  IconButton,
+  Tooltip,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { register } from "../services/AuthService";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
-import { IconButton, Tooltip } from "@mui/material";
 
 function RegisterPage() {
   const navigate = useNavigate();
@@ -29,7 +37,6 @@ function RegisterPage() {
       });
 
       alert("Registration successful!");
-
       navigate("/");
     } catch (err) {
       console.error(err);
@@ -43,7 +50,9 @@ function RegisterPage() {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        height: "100vh",
+        minHeight: "100vh",
+        p: 2,
+        py: { xs: 8, sm: 4 },
         background: "linear-gradient(135deg,#020617,#0f172a,#1e293b)",
         position: "relative",
       }}
@@ -53,8 +62,8 @@ function RegisterPage() {
           onClick={() => navigate("/")}
           sx={{
             position: "absolute",
-            top: 24,
-            left: 24,
+            top: { xs: 16, sm: 24 },
+            left: { xs: 16, sm: 24 },
             color: "white",
             background: "rgba(255,255,255,0.08)",
             backdropFilter: "blur(12px)",
@@ -72,15 +81,20 @@ function RegisterPage() {
       <Paper
         elevation={0}
         sx={{
-          p: 4,
-          width: 400,
+          p: { xs: 3, sm: 4 },
+          width: "100%",
+          maxWidth: 400,
           borderRadius: 4,
           backdropFilter: "blur(20px)",
           background: "rgba(255,255,255,.08)",
           border: "1px solid rgba(255,255,255,.1)",
         }}
       >
-        <Typography variant="h4" gutterBottom>
+        <Typography
+          variant="h4"
+          gutterBottom
+          sx={{ fontSize: { xs: "1.75rem", sm: "2.125rem" } }}
+        >
           TripVault
         </Typography>
 
@@ -93,6 +107,11 @@ function RegisterPage() {
           margin="normal"
           label="Full Name"
           value={name}
+          slotProps={{
+            htmlInput: {
+              style: { fontSize: "16px" },
+            },
+          }}
           onChange={(e) => setName(e.target.value)}
         />
 
@@ -101,6 +120,11 @@ function RegisterPage() {
           margin="normal"
           label="Username"
           value={username}
+          slotProps={{
+            htmlInput: {
+              style: { fontSize: "16px" },
+            },
+          }}
           onChange={(e) => setUsername(e.target.value)}
         />
 
@@ -110,6 +134,11 @@ function RegisterPage() {
           label="Email"
           type="email"
           value={email}
+          slotProps={{
+            htmlInput: {
+              style: { fontSize: "16px" },
+            },
+          }}
           onChange={(e) => setEmail(e.target.value)}
         />
 
@@ -119,6 +148,11 @@ function RegisterPage() {
           label="Password"
           type="password"
           value={password}
+          slotProps={{
+            htmlInput: {
+              style: { fontSize: "16px" },
+            },
+          }}
           onChange={(e) => setPassword(e.target.value)}
         />
 
@@ -128,13 +162,19 @@ function RegisterPage() {
           label="Confirm Password"
           type="password"
           value={confirmPassword}
+          slotProps={{
+            htmlInput: {
+              style: { fontSize: "16px" },
+            },
+          }}
           onChange={(e) => setConfirmPassword(e.target.value)}
         />
 
         <Button
           fullWidth
           variant="contained"
-          sx={{ mt: 3 }}
+          size="large"
+          sx={{ mt: 3, py: 1.2 }}
           onClick={handleRegister}
         >
           Create Account

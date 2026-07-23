@@ -37,7 +37,6 @@ const StorageAccountsPage = () => {
   useEffect(() => {
     if (searchParams.get("auth") === "success") {
       fetchStorageAccounts();
-      // Clean up the URL query param without triggering a full page reload
       navigate("/storage-accounts", { replace: true });
     }
   }, [searchParams, navigate]);
@@ -65,17 +64,21 @@ const StorageAccountsPage = () => {
 
   return (
     <PageLayout>
-      <Container maxWidth="lg">
+      <Container maxWidth="lg" sx={{ px: { xs: 1, sm: 2 } }}>
         <Stack
-          direction="row"
+          direction={{ xs: "column", sm: "row" }}
+          spacing={2}
           sx={{
             justifyContent: "space-between",
-            alignItems: "center",
+            alignItems: { xs: "stretch", sm: "center" },
+            mb: 4,
           }}
         >
           <Typography
+            variant="h4"
             sx={{
               fontWeight: 700,
+              fontSize: { xs: "1.5rem", sm: "2rem" },
             }}
           >
             Google Drive Accounts
@@ -85,6 +88,7 @@ const StorageAccountsPage = () => {
             variant="contained"
             size="large"
             onClick={handleConnectGoogle}
+            sx={{ width: { xs: "100%", sm: "auto" } }}
           >
             Connect Google Account
           </Button>
@@ -105,19 +109,30 @@ const StorageAccountsPage = () => {
                   boxShadow: 3,
                 }}
               >
-                <CardContent>
+                <CardContent sx={{ p: { xs: 2.5, sm: 3 } }}>
                   <Stack
                     direction="row"
                     sx={{
                       justifyContent: "space-between",
                       alignItems: "center",
+                      mb: 2,
                     }}
                   >
-                    <Typography variant="h6">{account.googleEmail}</Typography>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontSize: { xs: "1rem", sm: "1.25rem" },
+                        wordBreak: "break-word",
+                        pr: 1,
+                      }}
+                    >
+                      {account.googleEmail}
+                    </Typography>
 
                     <Chip
                       label={account.active ? "Active" : "Inactive"}
                       color={account.active ? "success" : "default"}
+                      size="small"
                     />
                   </Stack>
 
@@ -131,12 +146,12 @@ const StorageAccountsPage = () => {
                     }}
                   />
 
-                  <Typography color="text.secondary">
+                  <Typography color="text.secondary" variant="body2">
                     {formatBytes(account.usedQuota)} /{" "}
                     {formatBytes(account.totalQuota)}
                   </Typography>
 
-                  <Typography color="text.secondary">
+                  <Typography color="text.secondary" variant="body2">
                     {percentage.toFixed(2)}% Used
                   </Typography>
                 </CardContent>

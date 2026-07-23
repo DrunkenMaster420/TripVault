@@ -44,23 +44,33 @@ function DashboardPage() {
       {/* Hero Section */}
       <Box
         sx={{
-          mb: 6,
+          mb: { xs: 3, sm: 6 },
           display: "flex",
+          flexDirection: { xs: "column", sm: "row" },
           justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 3,
+          alignItems: { xs: "flex-start", sm: "center" },
+          gap: 2,
         }}
       >
         <Box>
-          <Typography variant="h3" sx={{ fontWeight: 700 }}>
+          <Typography
+            variant="h3"
+            sx={{
+              fontWeight: 700,
+              fontSize: { xs: "1.75rem", sm: "2.5rem", md: "3rem" },
+            }}
+          >
             Welcome{user ? `, ${user.username}` : ""} 👋
           </Typography>
 
           <Typography
             variant="h6"
             color="text.secondary"
-            sx={{ mt: 1, maxWidth: 600 }}
+            sx={{
+              mt: 1,
+              maxWidth: 600,
+              fontSize: { xs: "0.95rem", sm: "1.25rem" },
+            }}
           >
             Your memories, intelligently distributed across multiple cloud
             accounts.
@@ -72,18 +82,29 @@ function DashboardPage() {
           size="large"
           startIcon={<Add />}
           onClick={() => navigate("/create-trip")}
+          sx={{
+            width: { xs: "100%", sm: "auto" },
+            py: 1.2,
+          }}
         >
           Create Trip
         </Button>
       </Box>
 
       {/* Statistics */}
-      <Grid container spacing={3} sx={{ mb: 6 }}>
+      <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: { xs: 4, sm: 6 } }}>
         <Grid size={{ xs: 12, md: 4 }}>
-          <Card sx={{ p: 2, height: "100%" }}>
+          <Card sx={{ p: 1, height: "100%" }}>
             <CardContent>
               <Folder fontSize="large" color="primary" />
-              <Typography variant="h3" sx={{ mt: 2, fontWeight: 700 }}>
+              <Typography
+                variant="h3"
+                sx={{
+                  mt: 2,
+                  fontWeight: 700,
+                  fontSize: { xs: "2rem", sm: "3rem" },
+                }}
+              >
                 {trips.length}
               </Typography>
               <Typography color="text.secondary">Total Trips</Typography>
@@ -92,10 +113,17 @@ function DashboardPage() {
         </Grid>
 
         <Grid size={{ xs: 12, md: 4 }}>
-          <Card sx={{ p: 2, height: "100%" }}>
+          <Card sx={{ p: 1, height: "100%" }}>
             <CardContent>
               <Storage fontSize="large" color="primary" />
-              <Typography variant="h3" sx={{ mt: 2, fontWeight: 700 }}>
+              <Typography
+                variant="h3"
+                sx={{
+                  mt: 2,
+                  fontWeight: 700,
+                  fontSize: { xs: "2rem", sm: "3rem" },
+                }}
+              >
                 ∞
               </Typography>
               <Typography color="text.secondary">
@@ -106,10 +134,17 @@ function DashboardPage() {
         </Grid>
 
         <Grid size={{ xs: 12, md: 4 }}>
-          <Card sx={{ p: 2, height: "100%" }}>
+          <Card sx={{ p: 1, height: "100%" }}>
             <CardContent>
               <CloudDone fontSize="large" color="primary" />
-              <Typography variant="h3" sx={{ mt: 2, fontWeight: 700 }}>
+              <Typography
+                variant="h3"
+                sx={{
+                  mt: 2,
+                  fontWeight: 700,
+                  fontSize: { xs: "2rem", sm: "3rem" },
+                }}
+              >
                 Active
               </Typography>
               <Typography color="text.secondary">Cloud Sync</Typography>
@@ -118,12 +153,19 @@ function DashboardPage() {
         </Grid>
       </Grid>
 
-      {/* Trips */}
-      <Typography variant="h4" sx={{ mb: 3, fontWeight: 700 }}>
+      {/* Trips Section */}
+      <Typography
+        variant="h4"
+        sx={{
+          mb: 3,
+          fontWeight: 700,
+          fontSize: { xs: "1.5rem", sm: "2.125rem" },
+        }}
+      >
         My Trips
       </Typography>
 
-      <Grid container spacing={3}>
+      <Grid container spacing={{ xs: 2, sm: 3 }}>
         {trips.map((trip: any) => (
           <Grid key={trip.id} size={{ xs: 12, md: 6, lg: 4 }}>
             <Card
@@ -133,7 +175,7 @@ function DashboardPage() {
                 transition: ".3s",
 
                 "&:hover": {
-                  transform: "translateY(-8px)",
+                  transform: "translateY(-4px)",
                   boxShadow: "0 20px 40px rgba(91,140,255,.25)",
                 },
               }}
@@ -147,7 +189,7 @@ function DashboardPage() {
                   color="text.secondary"
                   sx={{
                     mt: 2,
-                    minHeight: 60,
+                    minHeight: { xs: "auto", sm: 60 },
                   }}
                 >
                   {trip.description}
@@ -156,7 +198,7 @@ function DashboardPage() {
                 <Stack
                   direction="row"
                   sx={{
-                    mt: 4,
+                    mt: 3,
                     justifyContent: "space-between",
                     alignItems: "center",
                   }}
@@ -181,8 +223,8 @@ function DashboardPage() {
       {trips.length === 0 && (
         <Card
           sx={{
-            mt: 5,
-            p: 6,
+            mt: 4,
+            p: { xs: 3, sm: 6 },
             textAlign: "center",
           }}
         >
@@ -199,6 +241,7 @@ function DashboardPage() {
             variant="contained"
             startIcon={<Add />}
             onClick={() => navigate("/create-trip")}
+            sx={{ width: { xs: "100%", sm: "auto" } }}
           >
             Create Your First Trip
           </Button>

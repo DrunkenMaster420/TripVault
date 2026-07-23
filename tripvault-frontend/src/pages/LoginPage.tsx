@@ -1,12 +1,19 @@
 import { useState } from "react";
-import { Box, Button, Paper, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Paper,
+  TextField,
+  Typography,
+  Link,
+  IconButton,
+  Tooltip,
+  Alert,
+} from "@mui/material";
 import { login } from "../services/AuthService";
 import { saveToken } from "../utils/AuthUtils";
 import { useNavigate } from "react-router-dom";
-import { Link } from "@mui/material";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
-import { IconButton, Tooltip } from "@mui/material";
-import { Alert } from "@mui/material";
 
 function LoginPage() {
   const [username, setUsername] = useState("");
@@ -43,7 +50,8 @@ function LoginPage() {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        height: "100vh",
+        minHeight: "100vh",
+        p: 2,
         background: "linear-gradient(135deg,#020617,#0f172a,#1e293b)",
         position: "relative",
       }}
@@ -53,8 +61,8 @@ function LoginPage() {
           onClick={() => navigate("/")}
           sx={{
             position: "absolute",
-            top: 24,
-            left: 24,
+            top: { xs: 16, sm: 24 },
+            left: { xs: 16, sm: 24 },
             color: "white",
             background: "rgba(255,255,255,0.08)",
             backdropFilter: "blur(12px)",
@@ -72,15 +80,20 @@ function LoginPage() {
       <Paper
         elevation={0}
         sx={{
-          p: 4,
-          width: 400,
+          p: { xs: 3, sm: 4 },
+          width: "100%",
+          maxWidth: 400,
           borderRadius: 4,
           backdropFilter: "blur(20px)",
           background: "rgba(255,255,255,.08)",
           border: "1px solid rgba(255,255,255,.1)",
         }}
       >
-        <Typography variant="h4" gutterBottom>
+        <Typography
+          variant="h4"
+          gutterBottom
+          sx={{ fontSize: { xs: "1.75rem", sm: "2.125rem" } }}
+        >
           TripVault Login
         </Typography>
 
@@ -89,6 +102,11 @@ function LoginPage() {
           fullWidth
           margin="normal"
           value={username}
+          slotProps={{
+            htmlInput: {
+              style: { fontSize: "16px" },
+            },
+          }}
           onChange={(e) => {
             setUsername(e.target.value);
             setError("");
@@ -101,6 +119,11 @@ function LoginPage() {
           fullWidth
           margin="normal"
           value={password}
+          slotProps={{
+            htmlInput: {
+              style: { fontSize: "16px" },
+            },
+          }}
           onChange={(e) => {
             setPassword(e.target.value);
             setError("");
@@ -115,12 +138,13 @@ function LoginPage() {
         <Button
           variant="contained"
           fullWidth
-          sx={{ mt: 2 }}
+          size="large"
+          sx={{ mt: 3, py: 1.2 }}
           onClick={handleLogin}
         >
           Login
         </Button>
-        <Typography align="center" sx={{ mt: 2 }}>
+        <Typography align="center" sx={{ mt: 3 }}>
           Don't have an account?{" "}
           <Link
             component="button"

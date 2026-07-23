@@ -14,7 +14,8 @@ const PageLayout = ({ children }: Props) => {
       <Container
         maxWidth="xl"
         sx={{
-          py: 4,
+          py: { xs: 2, sm: 4 },
+          px: { xs: 2, sm: 3 },
           minHeight: "calc(100vh - 64px)",
         }}
       >
